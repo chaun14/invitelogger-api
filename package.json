@@ -1,0 +1,23 @@
+{
+  "name": "invitelogger-api",
+  "version": "1.0.0",
+  "description": "invitelogger api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaun14/invitelogger-api.git"
+  },
+  "keywords": [
+    "invitelogger",
+    "api"
+  ],
+  "author": "chaun14",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chaun14/invitelogger-api/issues"
+  },
+  "homepage": "https://github.com/chaun14/invitelogger-api#readme"
+}
