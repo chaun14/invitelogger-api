@@ -3,13 +3,26 @@ import http from "http";
 import express, { Express } from "express";
 import morgan from "morgan";
 import payments from "./routes/payments/tebex";
+import bodyParser from "body-parser";
+import dotEnv from "dotenv";
 
+dotEnv.config();
 const router: Express = express();
 
 /** Logging */
 router.use(morgan("dev"));
 /** Parse the request */
 router.use(express.urlencoded({ extended: false }));
+
+// retrieve raw body for webhook validation
+router.use(
+  bodyParser.json({
+    verify: function (req, res, buf, encoding) {
+      req.rawBody = buf;
+    },
+  })
+);
+
 /** Takes care of JSON data */
 router.use(express.json());
 
