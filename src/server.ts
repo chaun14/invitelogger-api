@@ -2,9 +2,12 @@
 import http from "http";
 import express, { Express } from "express";
 import morgan from "morgan";
-import payments from "./routes/payments/tebex";
 import bodyParser from "body-parser";
 import dotEnv from "dotenv";
+
+// routes
+import payments from "./routes/payments/tebex";
+import votes from "./routes/votes/index";
 
 dotEnv.config();
 const router: Express = express();
@@ -42,6 +45,7 @@ router.use((req, res, next) => {
 
 /** Routes */
 router.use("/", payments);
+router.use("/", votes);
 
 /** Error handling */
 router.use((req, res, next) => {

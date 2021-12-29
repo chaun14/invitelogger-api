@@ -3,3 +3,10 @@ declare module "http" {
     rawBody: Buffer;
   }
 }
+
+declare namespace NodeJS {
+  export interface ProcessEnv {
+    TEBEX_KEY: string;
+    TOPGG_VOTE_WEBHOOK: string;
+  }
+}
