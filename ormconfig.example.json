@@ -1,0 +1,23 @@
+[{
+  "name": "bot-connection",
+  "type": "mysql",
+  "host": "host",
+  "port": 3306,
+  "username": "user",
+  "password": "pwd",
+  "database": "dbname",
+  "entities": [
+    "bin/entities/**/*.js"
+  ]
+}, {
+  "name": "dash-connection",
+  "type": "mysql",
+  "host": "host",
+  "port": 3306,
+  "username": "user",
+  "password": "pwd",
+  "database": "dbname",
+  "entities": [
+    "bin/entities/**/*.js"
+  ]
+}]
