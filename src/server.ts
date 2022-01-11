@@ -60,6 +60,7 @@ async function main() {
   app.use("/", payments);
   app.use("/", votes);
   app.use("/v1", v1);
+  app.get("/", (req, res) => res.redirect("/v1"));
 
   /** Not found */
   app.use((req, res, next) => {
