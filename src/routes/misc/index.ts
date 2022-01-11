@@ -3,6 +3,6 @@ import controller from "../../controllers/dummy";
 
 const router = express.Router();
 
-router.get("/dummy", controller.handleDummy);
+router.get("/checkauth", controller.checkAuth);
 
 export = router;

@@ -1,6 +1,6 @@
 import tokenAuth from "../middlewares/tokenAuth";
 import { Router } from "express";
-import dummy from "./dummy";
+import checkAuth from "./misc";
 import invites from "./invites";
 
 const v1: Router = Router();
@@ -16,7 +16,7 @@ v1.get("/", (req, res) => {
 v1.use(tokenAuth);
 
 // public router
-v1.use("/", dummy);
+v1.use("/", checkAuth);
 v1.use("/invites/", invites);
 
 export = v1;
