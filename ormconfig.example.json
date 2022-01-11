@@ -1,5 +1,5 @@
 [{
-  "name": "bot-connection",
+  "name": "bot",
   "type": "mysql",
   "host": "host",
   "port": 3306,
@@ -10,7 +10,7 @@
     "bin/entities/**/*.js"
   ]
 }, {
-  "name": "dash-connection",
+  "name": "dash",
   "type": "mysql",
   "host": "host",
   "port": 3306,
