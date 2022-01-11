@@ -1,6 +1,6 @@
 /** source/server.ts */
 import http from "http";
-import express, { Express } from "express";
+import express, { ErrorRequestHandler, Express, NextFunction } from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import dotEnv from "dotenv";
@@ -9,8 +9,10 @@ import "reflect-metadata";
 // routes
 import payments from "./routes/payments/tebex";
 import votes from "./routes/votes/index";
-import dummy from "./routes/dummy/dummy";
+import dummy from "./routes/dummy";
+import invites from "./routes/invites";
 import { createConnection } from "typeorm";
+import errorHandler from "./middlewares/errorHandler";
 
 dotEnv.config();
 
@@ -57,15 +59,19 @@ async function main() {
   router.use("/", payments);
   router.use("/", votes);
   router.use("/", dummy);
+  router.use("/invites/", invites);
   
-  /** Error handling */
+  /** Not found */
   router.use((req, res, next) => {
     const error = new Error("not found");
     return res.status(404).json({
       message: error.message,
     });
   });
-  
+
+  /** Error handling */
+  router.use(errorHandler);
+
   /** Server */
   const httpServer = http.createServer(router);
   const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
