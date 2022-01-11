@@ -1,61 +1,84 @@
 /** source/server.ts */
 import http from "http";
-import express, { Express } from "express";
+import express, { ErrorRequestHandler, Express, NextFunction, Router } from "express";
+import { createConnection } from "typeorm";
+import dotEnv from "dotenv";
+import "reflect-metadata";
+
+// middlewares
+import errorHandler from "./middlewares/errorHandler";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import dotEnv from "dotenv";
 
 // routes
+import v1 from "./routes/v1";
 import payments from "./routes/payments/tebex";
 import votes from "./routes/votes/index";
 
 dotEnv.config();
-const router: Express = express();
 
-/** Logging */
-router.use(morgan("dev"));
-/** Parse the request */
-router.use(express.urlencoded({ extended: false }));
+async function main() {
+  await createConnection("bot");
+  console.log("Connection to bot database created");
+  await createConnection("dash");
+  console.log("Connection to dash database created");
 
-// retrieve raw body for webhook validation
-router.use(
-  bodyParser.json({
-    verify: function (req, res, buf, encoding) {
-      req.rawBody = buf;
-    },
-  })
-);
+  const app: Express = express();
 
-/** Takes care of JSON data */
-router.use(express.json());
+  /** Logging */
+  app.use(morgan("dev"));
+  /** Parse the request */
+  app.use(express.urlencoded({ extended: false }));
 
-/** RULES OF OUR API */
-router.use((req, res, next) => {
-  // set the CORS policy
-  res.header("Access-Control-Allow-Origin", "*");
-  // set the CORS headers
-  res.header("Access-Control-Allow-Headers", "origin, X-Requested-With,Content-Type,Accept, Authorization");
-  // set the CORS method headers
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
-    return res.status(200).json({});
-  }
-  next();
-});
+  // retrieve raw body for webhook validation
+  app.use(
+    bodyParser.json({
+      verify: function (req, res, buf, encoding) {
+        req.rawBody = buf;
+      },
+    })
+  );
 
-/** Routes */
-router.use("/", payments);
-router.use("/", votes);
+  /** Takes care of JSON data */
+  app.use(express.json());
 
-/** Error handling */
-router.use((req, res, next) => {
-  const error = new Error("not found");
-  return res.status(404).json({
-    message: error.message,
+  /** RULES OF OUR API */
+  app.use((req, res, next) => {
+    // set the CORS policy
+    res.header("Access-Control-Allow-Origin", "*");
+    // set the CORS headers
+    res.header("Access-Control-Allow-Headers", "origin, X-Requested-With,Content-Type,Accept, Authorization");
+    // set the CORS method headers
+    if (req.method === "OPTIONS") {
+      res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
+      return res.status(200).json({});
+    }
+    next();
   });
-});
 
-/** Server */
-const httpServer = http.createServer(router);
-const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
-httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+  /** Routes */
+  app.use("/", payments);
+  app.use("/", votes);
+  app.use("/v1", v1);
+
+  /** Not found */
+  app.use((req, res, next) => {
+    const error = new Error("not found");
+    return res.status(404).json({
+      message: error.message,
+    });
+  });
+
+  /** Error handling */
+  app.use(errorHandler);
+
+  /** Server */
+  const httpServer = http.createServer(app);
+  const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
+  httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+}
+
+main().catch((reason: any) => {
+  console.log(reason);
+  process.exit(1);
+});

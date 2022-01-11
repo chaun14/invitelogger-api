@@ -9,12 +9,15 @@
         "outDir": "bin",
         "esModuleInterop": true,
         "strict": true,
+        "strictPropertyInitialization": false,
         "baseUrl": ".",
         "paths": {
             "@/*": [
                 "src/*"
             ]
         },
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
     },
     "include": [
         "src/**/*.ts"

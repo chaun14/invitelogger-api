@@ -1,0 +1,23 @@
+[{
+  "name": "bot",
+  "type": "mysql",
+  "host": "host",
+  "port": 3306,
+  "username": "user",
+  "password": "pwd",
+  "database": "dbname",
+  "entities": [
+    "bin/entities/**/*.js"
+  ]
+}, {
+  "name": "dash",
+  "type": "mysql",
+  "host": "host",
+  "port": 3306,
+  "username": "user",
+  "password": "pwd",
+  "database": "dbname",
+  "entities": [
+    "bin/entities/**/*.js"
+  ]
+}]
