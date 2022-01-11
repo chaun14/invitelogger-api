@@ -1,6 +1,6 @@
 /** source/server.ts */
 import http from "http";
-import express, { ErrorRequestHandler, Express, NextFunction } from "express";
+import express, { ErrorRequestHandler, Express, NextFunction, Router } from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import dotEnv from "dotenv";
@@ -22,15 +22,15 @@ async function main() {
   await createConnection("dash")
   console.log("Connection to dash database created")
 
-  const router: Express = express();
+  const app: Express = express();
 
   /** Logging */
-  router.use(morgan("dev"));
+  app.use(morgan("dev"));
   /** Parse the request */
-  router.use(express.urlencoded({ extended: false }));
+  app.use(express.urlencoded({ extended: false }));
   
   // retrieve raw body for webhook validation
-  router.use(
+  app.use(
     bodyParser.json({
       verify: function (req, res, buf, encoding) {
         req.rawBody = buf;
@@ -39,10 +39,12 @@ async function main() {
   );
   
   /** Takes care of JSON data */
-  router.use(express.json());
+  app.use(express.json());
+
+  const v1: Router = express.Router();
   
   /** RULES OF OUR API */
-  router.use((req, res, next) => {
+  v1.use((req, res, next) => {
     // set the CORS policy
     res.header("Access-Control-Allow-Origin", "*");
     // set the CORS headers
@@ -56,13 +58,15 @@ async function main() {
   });
   
   /** Routes */
-  router.use("/", payments);
-  router.use("/", votes);
-  router.use("/", dummy);
-  router.use("/invites/", invites);
+  v1.use("/", payments);
+  v1.use("/", votes);
+  v1.use("/", dummy);
+  v1.use("/invites/", invites);
+
+  app.use('/v1', v1);
   
   /** Not found */
-  router.use((req, res, next) => {
+  app.use((req, res, next) => {
     const error = new Error("not found");
     return res.status(404).json({
       message: error.message,
@@ -70,10 +74,10 @@ async function main() {
   });
 
   /** Error handling */
-  router.use(errorHandler);
+  app.use(errorHandler);
 
   /** Server */
-  const httpServer = http.createServer(router);
+  const httpServer = http.createServer(app);
   const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
   httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));   
 }
