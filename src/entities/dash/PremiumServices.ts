@@ -1,21 +1,20 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-export enum PremiumServiceStatus {
-  FAKE = "pending",
-  LEAVE = "active",
-  SELF = "suspended",
-  UNKNOWN = "canceled",
-}
-
 export enum PremiumServiceType {
-  FAKE = "pending",
-  LEAVE = "active",
-  SELF = "suspended",
-  UNKNOWN = "canceled",
+  GIFT = "gift",
+  SUB = "subscription",
+  BOOST = "boost",
 }
 
-@Entity()
-export class Premium_Services {
+export enum PremiumServiceStatus {
+  PENDING = "pending",
+  ACTIVE = "active",
+  SUSPENDED = "suspended",
+  CANCELED = "canceled",
+}
+
+@Entity("premium_services")
+export class PremiumServices {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
@@ -29,27 +28,17 @@ export class Premium_Services {
   })
   status: PremiumServiceStatus;
 
-  @Column({
-    type: "datetime",
-  })
-  createdAt: Date;
-
-  @Column({
-    type: "datetime",
-  })
-  updatedAt: Date;
-
   @Column({ type: "varchar", nullable: false })
   plan_id!: string;
 
   @Column({ type: "varchar", nullable: true })
-  subscriptionReference!: string;
+  subscriptionReference!: string | null;
 
   @Column({ type: "date", nullable: true })
-  activatedAt!: string;
+  renewedAt!: string;
 
   @Column({ type: "date", nullable: true })
-  suspendedAt!: string;
+  suspendedAt!: string | null;
 
   @Column({ type: "date", nullable: true })
   nextDue!: string;
@@ -60,4 +49,14 @@ export class Premium_Services {
     nullable: false,
   })
   type: PremiumServiceType;
+
+  @Column({
+    type: "datetime",
+  })
+  createdAt: string;
+
+  @Column({
+    type: "datetime",
+  })
+  updatedAt: string;
 }

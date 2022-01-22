@@ -11,8 +11,8 @@ export enum PremiumPlanPeriod {
   YEARLY = "yearly",
 }
 
-@Entity()
-export class Premium_Plans {
+@Entity("premium_plans")
+export class PremiumPlans {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
@@ -25,16 +25,6 @@ export class Premium_Plans {
     nullable: false,
   })
   category: PremiumPlanCategory;
-
-  @Column({
-    type: "datetime",
-  })
-  createdAt: Date;
-
-  @Column({
-    type: "datetime",
-  })
-  updatedAt: Date;
 
   @Column({ type: "bool", default: false })
   oneTime: boolean;
@@ -59,11 +49,21 @@ export class Premium_Plans {
     enum: PremiumPlanPeriod,
     nullable: false,
   })
-  type: PremiumPlanPeriod;
+  period: PremiumPlanPeriod;
 
   @Column({ type: "varchar", nullable: true, default: null })
   tebexPackageId!: string;
 
   @Column({ type: "varchar", nullable: true, default: null })
   tebexStoreUrl!: string;
+
+  @Column({
+    type: "datetime",
+  })
+  createdAt: Date;
+
+  @Column({
+    type: "datetime",
+  })
+  updatedAt: Date;
 }

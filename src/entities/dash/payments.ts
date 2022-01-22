@@ -7,13 +7,6 @@ export enum PremiumServiceStatus {
   UNKNOWN = "canceled",
 }
 
-export enum PremiumServiceType {
-  FAKE = "pending",
-  LEAVE = "active",
-  SELF = "suspended",
-  UNKNOWN = "canceled",
-}
-
 @Entity()
 export class Payments {
   @PrimaryGeneratedColumn({ type: "bigint" })
