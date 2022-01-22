@@ -84,6 +84,10 @@ async function paymentManager(payment: {
       // time to register the payment in our logs
       let sqlDatetime = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toJSON().slice(0, 19).replace("T", " ");
 
+      let existingPayment = await getConnection("dash").manager.findOne(Payments, { where: { payment_id: payment.subject.transaction_id } });
+
+      if (existingPayment) return console.log("DUPLICATE PAYMENT ENTRY RECIEVED !!");
+
       await getConnection("dash").manager.insert(Payments, {
         payment_id: payment.subject.transaction_id,
         amount: payment.subject.price.amount,
