@@ -10,6 +10,7 @@ declare namespace NodeJS {
   export interface ProcessEnv {
     TEBEX_KEY: string;
     TOPGG_VOTE_WEBHOOK: string;
+    ENVIRONNEMENT: string;
   }
 }
 
@@ -18,5 +19,5 @@ declare global {
     export interface Request {
       tokenAuth?: Applications;
     }
-  }  
+  }
 }
