@@ -39,7 +39,6 @@ const handleInvitesCode = async (req: Request, res: Response, next: NextFunction
           guild_id: req.body.guild_id,
           bot_id: req.body.bot_id,
           code: req.body.invite_code,
-          cleared: false
         }
       });
 
