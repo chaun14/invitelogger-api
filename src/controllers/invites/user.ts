@@ -5,50 +5,44 @@ import { getConnection } from "typeorm";
 
 /**
  * Returns the invites details for one user in one guild
- * @param req 
- * @param res 
- * @param next 
+ * @param req
+ * @param res
+ * @param next
  * @returns 200 and invites details, 403 if forbidden
  */
 const handleInvitesUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.tokenAuth) {
       // missing parameter(s)
-      if (!req.body
-        || !req.body.guild_id
-        || !req.body.bot_id
-        || !req.body.inviter_id
-      ) {
+      if (!req.body || !req.body.guild_id || !req.body.bot_id || !req.body.inviter_id) {
         res.status(400).json({
-          message: 'Missing parameter'
+          message: "Missing parameter",
         });
-        return
+        return;
       }
       // forbidden query
-      if (req.body.guild_id !== req.tokenAuth.guild_id
-        || req.body.bot_id !== req.tokenAuth.bot_id
-      ) {
+      if (req.body.guild_id !== req.tokenAuth.guild_id || req.body.bot_id !== req.tokenAuth.bot_id) {
         res.status(403).json({
-          message: "Access forbidden"
+          message: "Access forbidden",
         });
-        return
+        return;
       }
       // querying database for invite data
-      const joins = await getConnection('bot').manager.find(Joins, {
+      const joins = await getConnection("bot").manager.find(Joins, {
         where: {
           guild_id: req.body.guild_id,
           bot_id: req.body.bot_id,
           inviter_id: req.body.inviter_id,
-          cleared: false
-        }
+          cleared: false,
+        },
       });
-      const bonus = await getConnection('bot').manager.find(CustomInvites, {
+      const bonus = await getConnection("bot").manager.find(CustomInvites, {
         where: {
           guild_id: req.body.guild_id,
           bot_id: req.body.bot_id,
           member_id: req.body.inviter_id,
-          cleared: false
-        }
+          cleared: false,
+        },
       });
 
       // init invites data object
@@ -82,12 +76,12 @@ const handleInvitesUser = async (req: Request, res: Response, next: NextFunction
       userInvitesData.bonus = bonusCount;
 
       res.json(userInvitesData);
-      return
+      return;
     }
     // should never happen, because of tokenAuth middleware
     res.status(500).end();
   } catch (err) {
-    next(err)
+    next(err);
   }
 };
 
