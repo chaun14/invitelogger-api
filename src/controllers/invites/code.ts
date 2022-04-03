@@ -47,8 +47,9 @@ const handleInvitesCode = async (req: Request, res: Response, next: NextFunction
         created_at: join.createdAt,
         updated_at: join.updatedAt,
         member_id: join.member_id,
-        invalidated: join.invalidated,
+        invalidated: join.invalidated !== null,
       })));
+      return
     }
     // should never happen, because of tokenAuth middleware
     res.status(500).end();
