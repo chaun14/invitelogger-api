@@ -48,6 +48,7 @@ const handleInvitesCode = async (req: Request, res: Response, next: NextFunction
         updated_at: join.updatedAt,
         member_id: join.member_id,
         invalidated: join.invalidated !== null,
+        cleared: join.cleared
       })));
       return
     }
