@@ -1,8 +1,10 @@
 import express from "express";
-import controller from "../../controllers/invites/user";
+import userController from "../../controllers/invites/user";
+import invitesController from "../../controllers/invites/code";
 
 const router = express.Router();
 
-router.get("/user", controller.handleInvitesUser);
+router.get("/user", userController.handleInvitesUser);
+router.get("/code", invitesController.handleInvitesCode);
 
 export = router;
