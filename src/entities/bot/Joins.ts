@@ -3,7 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 export enum JoinType {
   USER = "user",
   VANITY = "vanity",
-  BOT = "bot"
+  BOT = "bot",
 }
 
 export enum InvalidatedReason {
@@ -11,7 +11,8 @@ export enum InvalidatedReason {
   LEAVE = "leave",
   SELF = "self",
   UNKNOWN = "unknow",
-  YOUNG = "young"
+  YOUNG = "young",
+  NEWFAKE = "newfake",
 }
 
 @Entity()
@@ -23,9 +24,9 @@ export class Joins {
   guild_id: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: JoinType,
-    nullable: true
+    nullable: true,
   })
   type: JoinType;
 
@@ -33,7 +34,7 @@ export class Joins {
   bot_id: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   code: string;
 
@@ -41,27 +42,27 @@ export class Joins {
   member_id: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   inviter_id: string;
 
-  @Column({type: "bool"})
+  @Column({ type: "bool" })
   cleared: boolean;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: InvalidatedReason,
-    nullable: true
+    nullable: true,
   })
-  invalidated: InvalidatedReason
+  invalidated: InvalidatedReason;
 
   @Column({
-    type: 'datetime'
+    type: "datetime",
   })
-  createdAt: Date
+  createdAt: Date;
 
   @Column({
-    type: 'datetime'
+    type: "datetime",
   })
-  updatedAt: Date
+  updatedAt: Date;
 }

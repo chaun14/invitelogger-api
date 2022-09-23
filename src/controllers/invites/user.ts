@@ -54,7 +54,7 @@ const handleInvitesUser = async (req: Request, res: Response, next: NextFunction
 
         if (invite.invalidated == null || invite.invalidated == InvalidatedReason.FAKE) {
           userInvitesData.real++;
-        } else if (invite.invalidated == InvalidatedReason.YOUNG) {
+        } else if (invite.invalidated == InvalidatedReason.YOUNG || invite.invalidated == InvalidatedReason.NEWFAKE) {
           userInvitesData.fake++;
         } else if (invite.invalidated == InvalidatedReason.SELF) {
           userInvitesData.fake++;
