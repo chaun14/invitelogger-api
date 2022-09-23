@@ -9,7 +9,8 @@ const handleTopggVote = async (req: Request, res: Response, next: NextFunction) 
   if (!req.body) return res.status(400).json({ message: `You didn't provide any data!` });
 
   res.status(200).json({ message: `Vote received!` });
-  console.log(`New vote top.gg by  `);
+
+  // console.log(req.body);
 
   if (req.body.type === "test") return console.log("Test vote received, not adding to database.", req.body);
   await getConnection("dash")
