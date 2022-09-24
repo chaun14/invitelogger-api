@@ -5,6 +5,7 @@ import { Payments } from "../entities/dash/Payments";
 import { PremiumPlanPeriod, PremiumPlans } from "../entities/dash/PremiumPlans";
 import { PremiumServices, PremiumServiceStatus, PremiumServiceType } from "../entities/dash/PremiumServices";
 import dayjs from "dayjs";
+import { sendMail } from "./emails/sendMail";
 
 enum TebexWebhookType {
   // Sub stuff
@@ -104,7 +105,15 @@ async function paymentManager(payment: PaymentWebhook | RecurringPaymentWebhook)
       break;
 
     case TebexWebhookType.SubscriptionEnd:
-      //TODO leaving us mail survey
+      payment = payment as RecurringPaymentWebhook;
+
+      sendMail(
+        payment.subject.initial_payment.customer.email,
+        "Your InviteLogger subscription has ended",
+        `Hello, your subscription ${payment.subject.reference} has been terminated for ${payment.subject.cancel_reason || "not specified"}. Any problem with your service ? Feel free to contact us 👋`,
+        { title: "Your service will expire", button_txt: "Contact us", button_url: "https://discord.gg/invitelogger" }
+      );
+
       break;
 
     case TebexWebhookType.SubscriptionRenew:
