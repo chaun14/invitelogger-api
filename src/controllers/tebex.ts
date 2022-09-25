@@ -15,6 +15,7 @@ enum TebexWebhookType {
 
   // payment stuff
   PaymentCreated = "payment.completed",
+  PaymentRefunded = "payment.refunded",
 
   // random stuff
   EndpointValidation = "validation.webhook",
@@ -24,7 +25,8 @@ interface Payment {
   transaction_id?: string;
   customer: { first_name: string; last_name: string; email: string; ip: string; username: { id: string; username: string } };
   recurring_payment_reference: string | null;
-  products: Array<{ id: number; quantity: number }>;
+  payment_sequence: string | "oneoff";
+  products: Array<{ id: number; quantity: number; name: string }>;
   price: {
     amount: number;
     currency: string;
@@ -107,6 +109,7 @@ async function paymentManager(payment: PaymentWebhook | RecurringPaymentWebhook)
     case TebexWebhookType.SubscriptionEnd:
       payment = payment as RecurringPaymentWebhook;
 
+      await getConnection("dash").manager.update(PremiumServices, { subscriptionReference: payment.subject.reference }, { subEndedAt: dayjs().format("YYYY-MM-DD  HH:mm:ss.000") });
       sendMail(
         payment.subject.initial_payment.customer.email,
         "Your InviteLogger subscription has ended",
@@ -198,6 +201,20 @@ async function paymentManager(payment: PaymentWebhook | RecurringPaymentWebhook)
       }
 
       break;
+
+    case TebexWebhookType.PaymentRefunded:
+      payment = payment as PaymentWebhook;
+      console.log("payment refunded " + payment.subject.transaction_id);
+      // time to register the payment in our logs
+      await getConnection("dash").manager.update(Payments, { payment_id: payment.subject.transaction_id }, { status: payment.subject.status.description, refundedAt: dayjs().format("YYYY-MM-DD  HH:mm:ss.000") });
+
+      // send an email to the customer
+      sendMail(
+        payment.subject.customer.email,
+        "Your payment has been refunded",
+        `Hello, your payment ${payment.subject.transaction_id} for ${payment.subject.products[0].name} (${payment.subject.price.amount} ${payment.subject.price.currency}) has been refunded, the process may take up to a few days to complete. ⚠️ Your service might be suspended depending on the context, reach to us for more informations`,
+        { button_txt: "Contact us", button_url: "https://discord.gg/invitelogger", title: "You've been refunded" }
+      );
   }
 }
 

@@ -41,6 +41,13 @@ export class Payments {
 
   @Column({
     type: "datetime",
+    nullable: true,
+    default: null,
+  })
+  refundedAt: Date;
+
+  @Column({
+    type: "datetime",
   })
   createdAt: Date;
 

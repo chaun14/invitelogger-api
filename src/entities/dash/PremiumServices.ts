@@ -34,6 +34,9 @@ export class PremiumServices {
   @Column({ type: "varchar", nullable: true })
   subscriptionReference!: string | null;
 
+  @Column({ type: "datetime", nullable: true, default: null })
+  subEndedAt!: string;
+
   @Column({ type: "date", nullable: true })
   renewedAt!: string;
 
