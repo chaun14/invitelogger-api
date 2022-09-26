@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 import { getConnection } from "typeorm";
 import { Payments } from "../entities/dash/Payments";
-import { PremiumPlanPeriod, PremiumPlans } from "../entities/dash/PremiumPlans";
+import { PremiumPlanCategory, PremiumPlanPeriod, PremiumPlans } from "../entities/dash/PremiumPlans";
 import { PremiumServices, PremiumServiceStatus, PremiumServiceType } from "../entities/dash/PremiumServices";
 import dayjs from "dayjs";
 import { sendMail } from "./emails/sendMail";
@@ -195,6 +195,25 @@ async function paymentManager(payment: PaymentWebhook | RecurringPaymentWebhook)
                 nextDue: nextDue,
                 type: PremiumServiceType.SUB,
               });
+
+              // send a mail to the user
+              // if the plan is a gold plan
+              if (currentPlan.category == PremiumPlanCategory.GOLD) {
+                sendMail(
+                  payment.subject.customer.email,
+                  "Your purchase on InviteLogger has been processed",
+                  `Hello, your ${currentPlan.name} has been activated succesfully. To activate InviteLogger gold on your server, please login on the Gold dashboard, select your service and insert your server id`,
+                  {
+                    title: "Thanks for your purchase",
+                  }
+                );
+              } else if (currentPlan.category == PremiumPlanCategory.PBI) {
+                sendMail(payment.subject.customer.email, "Your purchase on InviteLogger has been processed", `Hello, your ${currentPlan.name} has been activated succesfully. To activate your private bot instance, join our support server and run the tutorial below.`, {
+                  title: "Thanks for your purchase",
+                  button_txt: "Private bot setup tutorial",
+                  button_url: "https://docs.invitelogger.me/pbi/get-pbi/setup-your-private-bot-instance",
+                });
+              }
             }
           }
         }
