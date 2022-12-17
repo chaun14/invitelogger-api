@@ -54,7 +54,12 @@ export class Joins {
     enum: InvalidatedReason,
     nullable: true,
   })
-  invalidated: InvalidatedReason;
+  invalidated: InvalidatedReason | null;
+
+  @Column({
+    type: "int",
+  })
+  fakeCode: number;
 
   @Column({
     type: "datetime",

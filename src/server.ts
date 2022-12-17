@@ -1,6 +1,11 @@
 /** source/server.ts */
 import http from "http";
-import express, { ErrorRequestHandler, Express, NextFunction, Router } from "express";
+import express, {
+  ErrorRequestHandler,
+  Express,
+  NextFunction,
+  Router,
+} from "express";
 import { createConnection } from "typeorm";
 import dotEnv from "dotenv";
 import "reflect-metadata";
@@ -47,7 +52,10 @@ async function main() {
     // set the CORS policy
     res.header("Access-Control-Allow-Origin", "*");
     // set the CORS headers
-    res.header("Access-Control-Allow-Headers", "origin, X-Requested-With,Content-Type,Accept, Authorization");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "origin, X-Requested-With,Content-Type,Accept, Authorization"
+    );
     // set the CORS method headers
     if (req.method === "OPTIONS") {
       res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
@@ -61,6 +69,7 @@ async function main() {
   app.use("/", votes);
   app.use("/v1", v1);
   app.use("/internal", require("./routes/internal"));
+  app.use("/integrations", require("./routes/integrations"));
   app.get("/", (req, res) => res.redirect("/v1"));
 
   /** Not found */
@@ -77,7 +86,9 @@ async function main() {
   /** Server */
   const httpServer = http.createServer(app);
   const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
-  httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+  httpServer.listen(PORT, () =>
+    console.log(`The server is running on port ${PORT}`)
+  );
 }
 
 main().catch((reason: any) => {
