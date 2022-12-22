@@ -10,11 +10,7 @@ import { getConnection } from "typeorm";
  * @param next
  * @returns Empty response with status code 200 if authenticated,
  */
-const handleFakeVerification = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const handleFakeVerification = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // first check if the integration is enabled on the guild
     if (!req.body.guild_id || !req.body.member_id) {
@@ -25,22 +21,14 @@ const handleFakeVerification = async (
     }
 
     // check if the integration is enabled on the guild
-    const guildSettings = await getConnection("bot").manager.findOne(
-      GuildSettings,
-      { where: { guild_id: req.body.guild_id, bot_id: process.env.BOT_ID } }
-    );
+    const guildSettings = await getConnection("prodbot").manager.findOne(GuildSettings, { where: { guild_id: req.body.guild_id, bot_id: process.env.BOT_ID } });
     if (!guildSettings) {
       res.status(404).json({
         message: "Unknown guild",
       });
       return;
     }
-    if (
-      !guildSettings ||
-      !guildSettings.integrations ||
-      !guildSettings.integrations.dc ||
-      !guildSettings.integrations.dc.enabled
-    ) {
+    if (!guildSettings || !guildSettings.integrations || !guildSettings.integrations.dc || !guildSettings.integrations.dc.enabled) {
       res.status(403).json({
         message: "Integration not enabled",
       });
@@ -48,7 +36,7 @@ const handleFakeVerification = async (
     }
 
     // check if we have someone needing a fake verification
-    const fakeVerification = await getConnection("bot").manager.findOne(Joins, {
+    const fakeVerification = await getConnection("prodbot").manager.findOne(Joins, {
       where: {
         bot_id: process.env.BOT_ID,
         guild_id: req.body.guild_id,
@@ -68,14 +56,10 @@ const handleFakeVerification = async (
     for (let failedCheck of fakeReasonKeys) {
       if (failedCheck == "REQUIREDCVERIF") {
         // we calculate the new fakeCode
-        let newFakeCode = await removeFakeReason(
-          fakeVerification.fakeCode,
-          fakeTypes.REQUIREDCVERIF
-        );
+        let newFakeCode = await removeFakeReason(fakeVerification.fakeCode, fakeTypes.REQUIREDCVERIF);
         fakeVerification.fakeCode = newFakeCode;
-        fakeVerification.invalidated =
-          newFakeCode == 0 ? null : InvalidatedReason.NEWFAKE;
-        await getConnection("bot").manager.save(fakeVerification);
+        fakeVerification.invalidated = newFakeCode == 0 ? null : InvalidatedReason.NEWFAKE;
+        await getConnection("prodbot").manager.save(fakeVerification);
       }
     }
 
@@ -109,10 +93,7 @@ async function restoreFakeData(code: number): Promise<string[]> {
   return fakeReasonKeys;
 }
 
-export async function removeFakeReason(
-  currentFakeCode: number,
-  fakeType: number
-) {
+export async function removeFakeReason(currentFakeCode: number, fakeType: number) {
   let fakeTypeData = fakeTypesList.find((fake) => fake.id == fakeType);
   if (!fakeTypeData) throw new Error("Invalid fake type");
 
