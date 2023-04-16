@@ -20,6 +20,8 @@ dotEnv.config();
 async function main() {
   await createConnection("bot");
   console.log("Connection to bot database created");
+  await createConnection("prodbot");
+  console.log("Connection to main bot database created");
   await createConnection("dash");
   console.log("Connection to dash database created");
 
@@ -61,6 +63,7 @@ async function main() {
   app.use("/", votes);
   app.use("/v1", v1);
   app.use("/internal", require("./routes/internal"));
+  app.use("/integrations", require("./routes/integrations"));
   app.get("/", (req, res) => res.redirect("/v1"));
 
   /** Not found */
