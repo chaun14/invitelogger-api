@@ -1,6 +1,7 @@
 import { Votes } from "../entities/dash/Votes";
 import { Request, Response, NextFunction } from "express";
 import { getConnection } from "typeorm";
+import { verify } from "jsonwebtoken";
 
 const handleTopggVote = async (req: Request, res: Response, next: NextFunction) => {
   let authToken = req.get("authorization");
@@ -40,4 +41,34 @@ const handleVcodesVote = async (req: Request, res: Response, next: NextFunction)
     .catch((err) => console.error(err.message));
 };
 
-export default { handleTopggVote, handleVcodesVote };
+const handleDlistVote = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(req.body);
+
+  if (!req.body) return res.status(400).json({ message: `You didn't provide a body to decode !` });
+
+  // validate the jwt again our secret
+  try {
+    interface DlistReq {
+      bot_id: string;
+      user_id: string;
+      query: any;
+      is_test: boolean;
+    }
+
+    const decoded: DlistReq = verify(req.body, process.env.DLIST_VOTE_WEBHOOK as string) as DlistReq;
+
+    if (decoded.is_test) return console.log("Dlist Test vote received, not adding to database.", decoded);
+
+    await getConnection("dash")
+      .manager.insert(Votes, { user_id: decoded.user_id, bot_id: decoded.bot_id, weekend: false, platform: "dlist" })
+      .then((data) => console.log("New vote dlist.gg by " + decoded.user_id))
+      .catch((err) => console.error(err.message));
+
+    return res.status(200).json({ message: `Vote received thanks !` });
+  } catch (err) {
+    console.error(err);
+    return res.status(403).json({ message: `You didn't provide the correct authorization key!` });
+  }
+};
+
+export default { handleTopggVote, handleVcodesVote, handleDlistVote };

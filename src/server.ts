@@ -33,13 +33,16 @@ async function main() {
   app.use(express.urlencoded({ extended: false }));
 
   // retrieve raw body for webhook validation
+
   app.use(
     bodyParser.json({
       verify: function (req, res, buf, encoding) {
+        //console.log("buf", buf);
         req.rawBody = buf;
       },
     })
   );
+  app.use(express.text());
 
   /** Takes care of JSON data */
   app.use(express.json());
