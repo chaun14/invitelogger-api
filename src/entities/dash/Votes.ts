@@ -11,6 +11,9 @@ export class Votes {
   @Column()
   user_id: string;
 
+  @Column({ type: "enum", default: "topgg", enum: ["topgg", "vcodes", "dlist"] })
+  platform: string;
+
   @Column({ type: "boolean", default: false })
   weekend: boolean;
 

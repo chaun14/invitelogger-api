@@ -19,4 +19,25 @@ const handleTopggVote = async (req: Request, res: Response, next: NextFunction) 
     .catch((err) => console.error(err.message));
 };
 
-export default { handleTopggVote };
+const handleVcodesVote = async (req: Request, res: Response, next: NextFunction) => {
+  let authToken = req.get("authorization");
+  if (!authToken) return res.status(400).json({ message: `You didn't provide an 'Authorization' header!` });
+  if (authToken !== process.env.VCODES_VOTE_WEBHOOK) return res.status(403).json({ message: `You didn't provide the correct authorization key!` });
+  if (!req.body) return res.status(400).json({ message: `You didn't provide any data!` });
+
+  res.status(200).json({ message: `Vote received thanks !` });
+  let botID = req.params.bot_id;
+  if (!botID) botID = "499595256270946326";
+
+  if (req.body.trigger !== "vote") return;
+
+  // console.log(req.body);
+
+  if (req.body.test) return console.log("Vcodes Test vote received, not adding to database.", req.body);
+  await getConnection("dash")
+    .manager.insert(Votes, { user_id: req.body.user.id, bot_id: botID, weekend: false, platform: "vcodes" })
+    .then((data) => console.log("New vote vcodes.xyz by " + req.body.user.tag + " (" + req.body.user.id + ") "))
+    .catch((err) => console.error(err.message));
+};
+
+export default { handleTopggVote, handleVcodesVote };
