@@ -57,7 +57,11 @@ const handleDlistVote = async (req: Request, res: Response, next: NextFunction) 
 
     const decoded: DlistReq = verify(req.body, process.env.DLIST_VOTE_WEBHOOK as string) as DlistReq;
 
-    if (decoded.is_test) return console.log("Dlist Test vote received, not adding to database.", decoded);
+    if (decoded.is_test) {
+      res.status(200).json({ message: `Test vote received thanks !` });
+      console.log("Dlist Test vote received, not adding to database.", decoded);
+      return;
+    }
 
     await getConnection("dash")
       .manager.insert(Votes, { user_id: decoded.user_id, bot_id: decoded.bot_id, weekend: false, platform: "dlist" })
