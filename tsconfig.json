@@ -32,7 +32,6 @@
       "@middlewares/*": ["src/middlewares/*"],
       "@routes/*": ["src/routes/*"],
       "@utils/*": ["src/utils/*"],
-
       "@config": ["config/config.js"],
       "@config/orm": ["config/ormconfig.js"]
     },
