@@ -10,8 +10,8 @@ const createDataSourceOptions = (name: string): DataSourceOptions => ({
   password: config.databases[name]["password"]!,
   database: config.databases[name]["database"]!,
   synchronize: config.environment === Environments.Development,
-  logging: config.environment === Environments.Development ? true : ["error"],
-  entities: [`src/entity/${name}/**/*.ts`],
+  logging: ["error"],
+  entities: [`src/entity/${name}/**/*.js`],
 });
 
 export const dashDataSource = new DataSource(createDataSourceOptions("dash"));

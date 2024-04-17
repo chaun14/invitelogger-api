@@ -34,7 +34,7 @@ const config = {
 
   // Database configurations
   databases: {
-    dashboard: {
+    dash: {
       host: env.DASH_DB_HOST,
       port: Number(env.DASH_DB_PORT),
       username: env.DASH_DB_USERNAME,

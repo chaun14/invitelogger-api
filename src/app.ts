@@ -1,12 +1,10 @@
 import "reflect-metadata";
 import "dotenv/config.js";
 
-/** source/server.ts */
 import express, { Express, NextFunction, Request, Response } from "express";
-import { createConnection } from "typeorm";
-import morgan from "morgan";
 
 // middlewares
+import httpLogger from "@middlewares/httpLogger.js";
 import errorHandler from "@middlewares/errorHandler.js";
 
 // routes
@@ -16,25 +14,34 @@ import votes from "@routes/votes/index.js";
 import internal from "@routes/internal/index.js";
 import migration from "@routes/integrations/index.js";
 
+// logger
+import logger, { Level } from "@utils/logger.js";
+
 // config
 import config from "@config";
+import { botDataSource, dashDataSource } from "@config/orm";
 
-async function main(): Promise<void> {
-  await createConnection("bot");
-  console.log("Connection to bot database created");
-  await createConnection("prodbot");
-  console.log("Connection to main bot database created");
-  await createConnection("dash");
-  console.log("Connection to dash database created");
+const app: Express = express();
+const PORT: number | string = config.port ? Number(config.port) : 5780;
 
-  const app: Express = express();
+// initialize data sources (typeorm)
+const initializeDataSources = async (): Promise<void> => {
+  await botDataSource.initialize();
+  logger(Level.Info, "Connection to bot database initialized");
 
-  /** Logging */
-  app.use(morgan("dev"));
-  /** Parse the request */
+  await dashDataSource.initialize();
+  logger(Level.Info, "Connection to dash database initialized");
+};
+
+// start app
+const main = async (): Promise<void> => {
+  await initializeDataSources();
+
+  app.use(httpLogger);
+
   app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
 
-  // retrieve raw body for webhook validation
   app.use((req: Request, _res: Response, next: NextFunction): void => {
     req.rawBody = Buffer.alloc(0);
 
@@ -45,28 +52,21 @@ async function main(): Promise<void> {
     next();
   });
 
-  /** Takes care of JSON data */
-  app.use(express.json());
-
-  /** RULES OF OUR API */
-  app.use((req: Request, res: Response, next: NextFunction): void => {
-    // set the CORS policy
+  app.use((req: Request, res: Response, next: NextFunction) => {
     res.header("Access-Control-Allow-Origin", "*");
-    // set the CORS headers
     res.header(
       "Access-Control-Allow-Headers",
-      "origin, X-Requested-With,Content-Type,Accept, Authorization"
+      "origin, X-Requested-With, Content-Type, Accept, Authorization"
     );
-    // set the CORS method headers
+
     if (req.method === "OPTIONS") {
-      res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
+      res.header("Access-Control-Allow-Methods", "GET, POST");
       res.status(200).json({});
-      return;
+    } else {
+      next();
     }
-    next();
   });
 
-  /** Routes */
   app.use("/", payments);
   app.use("/", votes);
   app.use("/v1", v1);
@@ -74,25 +74,16 @@ async function main(): Promise<void> {
   app.use("/integrations", migration);
   app.get("/", (_req: Request, res: Response) => res.redirect("/v1"));
 
-  /** Not found */
-  app.use((_req: Request, res: Response): void => {
-    const error: Error = new Error("not found");
-    res.status(404).json({
-      message: error.message,
-    });
-
-    return;
+  app.use((_req: Request, res: Response) => {
+    res.status(404).json({ message: "not found" });
   });
 
-  /** Error handling */
   app.use(errorHandler);
 
-  /** Server */
-  const PORT: number | string = config.port ? Number(config.port) : 5780;
-  app.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
-}
+  app.listen(PORT, () => logger(Level.Info, `Server running on port ${PORT}`));
+};
 
 main().catch((reason: any): void => {
-  console.log(reason);
+  logger(Level.Error, reason);
   process.exit(1);
 });
