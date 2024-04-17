@@ -1,21 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 
 // middleware checking for basic token authentication
-const dcTokenAuth = async (req: Request, res: Response, next: NextFunction) => {
+const dcTokenAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer ")
-    ) {
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
       const key = req.headers.authorization.slice(7);
       if (key === process.env.DC_API_KEY) {
         // store authentication information into request object
         next();
         return;
       } else {
-        return res.status(401).json({
+        res.status(401).json({
           message: "Invalid token",
         });
+
+        return;
       }
     }
 

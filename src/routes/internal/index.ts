@@ -1,9 +1,9 @@
-import internalTokenAuthentication from "../../middlewares/internalAuth";
-import express from "express";
-
-const router = express.Router();
+import internalTokenAuthentication from "../../middlewares/internalAuth.js";
+import mail from "./email/email.js";
+import { Router } from "express";
+const router: Router = Router();
 
 router.use(internalTokenAuthentication);
-router.use("/mail", require("./email/email"));
+router.use("/mail", mail);
 
-export = router;
+export default router;

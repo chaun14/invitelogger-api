@@ -1,6 +1,6 @@
-import { GuildSettings } from "../../entities/bot/GuildSettings";
-import { InvalidatedReason, Joins } from "../../entities/bot/Joins";
-import { Request, Response, NextFunction } from "express";
+import { GuildSettings } from "../../entity/bot/GuildSettings.js";
+import { InvalidatedReason, Joins } from "../../entity/bot/Joins.js";
+import { Request, Response } from "express";
 import { getConnection } from "typeorm";
 
 /**
@@ -10,7 +10,7 @@ import { getConnection } from "typeorm";
  * @param next
  * @returns Empty response with status code 200 if authenticated,
  */
-const handleFakeVerification = async (req: Request, res: Response, next: NextFunction) => {
+const handleFakeVerification = async (req: Request, res: Response): Promise<void> => {
   try {
     // first check if the integration is enabled on the guild
     if (!req.body.guild_id || !req.body.member_id) {
@@ -21,14 +21,21 @@ const handleFakeVerification = async (req: Request, res: Response, next: NextFun
     }
 
     // check if the integration is enabled on the guild
-    const guildSettings = await getConnection("prodbot").manager.findOne(GuildSettings, { where: { guild_id: req.body.guild_id, bot_id: process.env.BOT_ID } });
+    const guildSettings = await getConnection("prodbot").manager.findOne(GuildSettings, {
+      where: { guild_id: req.body.guild_id, bot_id: process.env.BOT_ID },
+    });
     if (!guildSettings) {
       res.status(404).json({
         message: "Unknown guild",
       });
       return;
     }
-    if (!guildSettings || !guildSettings.integrations || !guildSettings.integrations.dc || !guildSettings.integrations.dc.enabled) {
+    if (
+      !guildSettings ||
+      !guildSettings.integrations ||
+      !guildSettings.integrations.dc ||
+      !guildSettings.integrations.dc.enabled
+    ) {
       res.status(403).json({
         message: "Integration not enabled",
       });
@@ -51,35 +58,38 @@ const handleFakeVerification = async (req: Request, res: Response, next: NextFun
       });
       return;
     }
-    let fakeReasonKeys = await restoreFakeData(fakeVerification.fakeCode);
+    const fakeReasonKeys = await restoreFakeData(fakeVerification.fakeCode);
     console.log(fakeReasonKeys);
-    for (let failedCheck of fakeReasonKeys) {
+    for (const failedCheck of fakeReasonKeys) {
       if (failedCheck == "REQUIREDCVERIF") {
         // we calculate the new fakeCode
-        let newFakeCode = await removeFakeReason(fakeVerification.fakeCode, fakeTypes.REQUIREDCVERIF);
+        const newFakeCode = await removeFakeReason(
+          fakeVerification.fakeCode,
+          fakeTypes.REQUIREDCVERIF
+        );
         fakeVerification.fakeCode = newFakeCode;
         fakeVerification.invalidated = newFakeCode == 0 ? null : InvalidatedReason.NEWFAKE;
         await getConnection("prodbot").manager.save(fakeVerification);
       }
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Success",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 async function restoreFakeData(code: number): Promise<string[]> {
-  let fakeReasonKeys = [];
-  for (let item of fakeTypesList) {
+  const fakeReasonKeys: string[] = [];
+  for (const item of fakeTypesList) {
     console.log({ item });
-    let fakeKey = fakeTypes[item.id] as string;
+    const fakeKey = fakeTypes[item.id] as string;
     console.log({ fakeKey });
     if (fakeKey) {
-      let fakeCode = fakeCodes[fakeKey as any];
+      const fakeCode = fakeCodes[fakeKey as any];
 
       console.log({ code, fakeCode, result: code & parseInt(fakeCode) });
 
@@ -93,8 +103,8 @@ async function restoreFakeData(code: number): Promise<string[]> {
   return fakeReasonKeys;
 }
 
-export async function removeFakeReason(currentFakeCode: number, fakeType: number) {
-  let fakeTypeData = fakeTypesList.find((fake) => fake.id == fakeType);
+export async function removeFakeReason(currentFakeCode: number, fakeType: number): Promise<number> {
+  const fakeTypeData = fakeTypesList.find((fake) => fake.id == fakeType);
   if (!fakeTypeData) throw new Error("Invalid fake type");
 
   currentFakeCode = currentFakeCode ^ fakeTypeData.code;

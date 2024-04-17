@@ -1,10 +1,10 @@
-import express from "express";
-import userController from "../../controllers/invites/user";
-import invitesController from "../../controllers/invites/code";
+import { Router } from "express";
+import userController from "../../controllers/invites/user.js";
+import invitesController from "../../controllers/invites/code.js";
 
-const router = express.Router();
+const router: Router = Router();
 
 router.get("/user", userController.handleInvitesUser);
 router.get("/code", invitesController.handleInvitesCode);
 
-export = router;
+export default router;

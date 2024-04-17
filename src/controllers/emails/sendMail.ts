@@ -1,7 +1,12 @@
 import sgMail from "@sendgrid/mail";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 
-export const sendMail = async (to: string, subject: string, message: string, options: { title?: string; button_url?: string; button_txt?: string }) => {
+export const sendMail = async (
+  to: string,
+  subject: string,
+  message: string,
+  options: { title?: string; button_url?: string; button_txt?: string }
+) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
   const msg = {
@@ -28,17 +33,29 @@ export const sendMail = async (to: string, subject: string, message: string, opt
     });
 };
 
-export const handleMailRequest = async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.body) return res.status(400).json({ message: `You didn't provide any data!` });
+export const handleMailRequest = async (req: Request, res: Response): Promise<void> => {
+  if (!req.body) {
+    res.status(400).json({ message: "You didn't provide any data!" });
+    return;
+  }
 
-  if (!req.body.email) return res.status(400).json({ message: `You didn't provide an email` });
-  let email = req.body.email;
+  if (!req.body.email) {
+    res.status(400).json({ message: "You didn't provide an email" });
+    return;
+  }
+  const email = req.body.email;
 
-  if (!req.body.subject) return res.status(400).json({ message: `You didn't provide a subject` });
-  let subject = req.body.subject;
+  if (!req.body.subject) {
+    res.status(400).json({ message: "You didn't provide a subject" });
+    return;
+  }
+  const subject = req.body.subject;
 
-  if (!req.body.message) return res.status(400).json({ message: `You didn't provide a message` });
-  let message = req.body.message;
+  if (!req.body.message) {
+    res.status(400).json({ message: "You didn't provide a message" });
+    return;
+  }
+  const message = req.body.message;
 
   let title = subject;
   let button_url = "https://gold.invitelogger.me";
@@ -49,6 +66,10 @@ export const handleMailRequest = async (req: Request, res: Response, next: NextF
     if (req.body.options.button_txt) button_txt = req.body.options.button_txt;
   }
 
-  await sendMail(email, subject, message, { title: title, button_url: button_url, button_txt: button_txt });
+  await sendMail(email, subject, message, {
+    title: title,
+    button_url: button_url,
+    button_txt: button_txt,
+  });
   res.json({ message: "Email sent" });
 };

@@ -1,11 +1,11 @@
-import express from "express";
-import dcTokenAuth from "./auth";
-import { handleFakeVerification } from "../../../controllers/integrations/doubleCounter";
+import { Router } from "express";
+import dcTokenAuth from "./auth.js";
+import { handleFakeVerification } from "../../../controllers/integrations/doubleCounter.js";
 
-const router = express.Router();
+const router: Router = Router();
 
 router.use(dcTokenAuth);
 
 router.post("/verification", handleFakeVerification);
 
-export = router;
+export default router;

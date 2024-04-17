@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity({ name: 'customInvites'})
+@Entity({ name: "customInvites" })
 export class CustomInvites {
   @PrimaryGeneratedColumn()
   id: number;
@@ -17,18 +17,18 @@ export class CustomInvites {
   @Column()
   creator_id: string;
 
-  @Column({ type: 'bool' })
-  cleared: boolean
+  @Column({ type: "bool" })
+  cleared: boolean;
 
-  @Column({ type: 'datetime' })
-  createdAt: Date
+  @Column({ type: "datetime" })
+  createdAt: Date;
 
-  @Column({ type: 'datetime' })
-  updatedAt: Date
+  @Column({ type: "datetime" })
+  updatedAt: Date;
 
-  @Column({ type: 'bigint' })
-  amount: string
+  @Column({ type: "bigint" })
+  amount: string;
 
   @Column()
-  reason: string
+  reason: string;
 }

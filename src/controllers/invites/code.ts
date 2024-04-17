@@ -1,5 +1,4 @@
-import { CustomInvites } from "../../entities/bot/CustomInvites";
-import { InvalidatedReason, Joins } from "../../entities/bot/Joins";
+import { Joins } from "../../entity/bot/Joins.js";
 import { Request, Response, NextFunction } from "express";
 import { getConnection } from "typeorm";
 
@@ -10,7 +9,11 @@ import { getConnection } from "typeorm";
  * @param next
  * @returns 200 and invites details, 403 if forbidden
  */
-const handleInvitesCode = async (req: Request, res: Response, next: NextFunction) => {
+const handleInvitesCode = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     if (req.tokenAuth) {
       // missing parameter(s)
@@ -21,7 +24,10 @@ const handleInvitesCode = async (req: Request, res: Response, next: NextFunction
         return;
       }
       // forbidden query
-      if (req.body.guild_id !== req.tokenAuth.guild_id || req.body.bot_id !== req.tokenAuth.bot_id) {
+      if (
+        req.body.guild_id !== req.tokenAuth.guild_id ||
+        req.body.bot_id !== req.tokenAuth.bot_id
+      ) {
         res.status(403).json({
           message: "Access forbidden",
         });

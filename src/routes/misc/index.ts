@@ -1,8 +1,7 @@
-import express from "express";
-import controller from "../../controllers/dummy";
-
-const router = express.Router();
+import { Router } from "express";
+import controller from "../../controllers/dummy.js";
+const router: Router = Router();
 
 router.get("/checkauth", controller.checkAuth);
 
-export = router;
+export default router;

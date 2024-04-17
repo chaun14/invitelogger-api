@@ -1,7 +1,7 @@
-import express from "express";
-import controller from "../../controllers/tebex";
-const router = express.Router();
+import { Router } from "express";
+import controller from "../../controllers/tebex.js";
+const router: Router = Router();
 
 router.post("/payments", controller.handleTebexWebhook);
 
-export = router;
+export default router;

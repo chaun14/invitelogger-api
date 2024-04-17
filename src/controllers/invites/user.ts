@@ -1,5 +1,5 @@
-import { CustomInvites } from "../../entities/bot/CustomInvites";
-import { InvalidatedReason, Joins } from "../../entities/bot/Joins";
+import { CustomInvites } from "../../entity/bot/CustomInvites.js";
+import { InvalidatedReason, Joins } from "../../entity/bot/Joins.js";
 import { Request, Response, NextFunction } from "express";
 import { getConnection } from "typeorm";
 
@@ -21,7 +21,10 @@ const handleInvitesUser = async (req: Request, res: Response, next: NextFunction
         return;
       }
       // forbidden query
-      if (req.body.guild_id !== req.tokenAuth.guild_id || req.body.bot_id !== req.tokenAuth.bot_id) {
+      if (
+        req.body.guild_id !== req.tokenAuth.guild_id ||
+        req.body.bot_id !== req.tokenAuth.bot_id
+      ) {
         res.status(403).json({
           message: "Access forbidden",
         });
@@ -46,15 +49,18 @@ const handleInvitesUser = async (req: Request, res: Response, next: NextFunction
       });
 
       // init invites data object
-      let userInvitesData = { total: 0, leaves: 0, fake: 0, bonus: 0, real: 0 };
+      const userInvitesData = { total: 0, leaves: 0, fake: 0, bonus: 0, real: 0 };
 
       // assign all joins to the user in the right category
-      for (let invite of joins) {
+      for (const invite of joins) {
         userInvitesData.total++;
 
         if (invite.invalidated == null || invite.invalidated == InvalidatedReason.FAKE) {
           userInvitesData.real++;
-        } else if (invite.invalidated == InvalidatedReason.YOUNG || invite.invalidated == InvalidatedReason.NEWFAKE) {
+        } else if (
+          invite.invalidated == InvalidatedReason.YOUNG ||
+          invite.invalidated == InvalidatedReason.NEWFAKE
+        ) {
           userInvitesData.fake++;
         } else if (invite.invalidated == InvalidatedReason.SELF) {
           userInvitesData.fake++;

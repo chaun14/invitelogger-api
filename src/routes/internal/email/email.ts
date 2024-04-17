@@ -1,8 +1,8 @@
-import { handleMailRequest } from "../../../controllers/emails/sendMail";
-import express from "express";
+import { handleMailRequest } from "../../../controllers/emails/sendMail.js";
+import { Router } from "express";
 
-const router = express.Router();
+const router: Router = Router();
 
 router.post("/", handleMailRequest);
 
-export = router;
+export default router;

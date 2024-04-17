@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 
 // middleware checking for basic token authentication
-const internalTokenAuthentication = async (req: Request, res: Response, next: NextFunction) => {
+const internalTokenAuthentication = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
       const key = req.headers.authorization.slice(7);
@@ -10,9 +14,11 @@ const internalTokenAuthentication = async (req: Request, res: Response, next: Ne
         next();
         return;
       } else {
-        return res.status(401).json({
+        res.status(401).json({
           message: "Invalid token",
         });
+
+        return;
       }
     }
 

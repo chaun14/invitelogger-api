@@ -1,22 +1,27 @@
-import { Applications } from "../entities/dash/Applications";
-
-declare module "http" {
-  export interface IncomingMessage {
-    rawBody: Buffer;
-  }
-}
-
-declare namespace NodeJS {
-  export interface ProcessEnv {
-    TEBEX_KEY: string;
-    TOPGG_VOTE_WEBHOOK: string;
-  }
-}
+import { Applications } from "../entity/dash/Applications.js";
 
 declare global {
-  namespace Express {
-    export interface Request {
-      tokenAuth?: Applications;
+  namespace NodeJS {
+    export interface ProcessEnv {
+      PORT?: string;
+      BOT_ID?: string;
+      TOPGG_VOTE_WEBHOOK: string;
+      VCODES_VOTE_WEBHOOK?: string;
+      DLIST_VOTE_WEBHOOK?: string;
+      WUMPUSSTORE_VOTE_WEBHOOK?: string;
+      TEBEX_KEY?: string;
+      INTERNAL_API_KEY?: string;
+      SENDGRID_API_KEY?: string;
+      DC_API_KEY?: string;
     }
-  }  
+  }
+
+  namespace Express {
+    interface Request {
+      tokenAuth?: Applications;
+      rawBody: Buffer;
+    }
+  }
 }
+
+export {};
