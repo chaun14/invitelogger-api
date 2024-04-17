@@ -1,12 +1,13 @@
+import "reflect-metadata";
+import "dotenv/config.js";
+
 /** source/server.ts */
 import express, { Express, NextFunction, Request, Response } from "express";
 import { createConnection } from "typeorm";
-import "dotenv/config.js";
-import "reflect-metadata";
+import morgan from "morgan";
 
 // middlewares
 import errorHandler from "@middlewares/errorHandler.js";
-import morgan from "morgan";
 
 // routes
 import v1 from "@routes/v1.js";
@@ -14,6 +15,9 @@ import payments from "@routes/payments/tebex.js";
 import votes from "@routes/votes/index.js";
 import internal from "@routes/internal/index.js";
 import migration from "@routes/integrations/index.js";
+
+// config
+import config from "@config";
 
 async function main(): Promise<void> {
   await createConnection("bot");
@@ -40,8 +44,6 @@ async function main(): Promise<void> {
 
     next();
   });
-
-  app.use(express.text());
 
   /** Takes care of JSON data */
   app.use(express.json());
@@ -86,7 +88,7 @@ async function main(): Promise<void> {
   app.use(errorHandler);
 
   /** Server */
-  const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
+  const PORT: number | string = config.port ? Number(config.port) : 5780;
   app.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
 }
 

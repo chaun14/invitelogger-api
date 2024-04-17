@@ -10,7 +10,7 @@
     "declarationMap": false,
     "sourceMap": false,
     "outDir": "bin",
-    "rootDir": "src",
+    "rootDirs": ["src", "config"],
     "resolveJsonModule": true,
     "removeComments": true,
     "strict": true,
@@ -24,18 +24,21 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "rootDirs": ["src"],
-    "typeRoots": ["src/types", "node_modules/@types"],
+    "types": ["../types"],
+    "typeRoots": ["types", "node_modules/@types"],
     "paths": {
       "@controllers/*": ["src/controllers/*"],
       "@entity/*": ["src/entity/*"],
       "@middlewares/*": ["src/middlewares/*"],
-      "@routes/*": ["src/routes/*"]
+      "@routes/*": ["src/routes/*"],
+
+      "@config": ["config/config.js"],
+      "@config/orm": ["config/ormconfig.js"]
     },
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "bin"]
+  "include": ["src/**/*.ts", "config/**/*.ts"],
+  "exclude": ["node_modules", "bin", "types/**/*"]
 }
