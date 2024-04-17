@@ -12,7 +12,7 @@ if ! echo "$commit_msg" | grep -Eq "^($types)"; then
   exit 1
 fi
 
-if ! echo "$commit_msg" | grep -Eq ": [a-z].{2,74}$"; then
+if ! echo "$commit_msg" | grep -Eq ": [a-z].{2,75}$"; then
   echo ""
   echo "ERROR: Missing or incorrect commit description."
   echo "The commit description must be written in lowercase and be between 3 and 75 characters long."
