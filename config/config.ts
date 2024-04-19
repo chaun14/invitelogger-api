@@ -48,6 +48,13 @@ const config = {
       password: env.BOT_DB_PASSWORD,
       database: env.BOT_DB_DATABASE,
     },
+    prod: {
+      host: env.PROD_DB_HOST,
+      port: Number(env.PROD_DB_PORT),
+      username: env.PROD_DB_USERNAME,
+      password: env.PROD_DB_PASSWORD,
+      database: env.PROD_DB_DATABASE,
+    },
   },
 };
 

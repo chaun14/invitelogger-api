@@ -23,6 +23,11 @@ declare global {
       BOT_DB_USERNAME?: string;
       BOT_DB_PASSWORD?: string;
       BOT_DB_DATABASE?: string;
+      PROD_DB_HOST?: string;
+      PROD_DB_PORT?: string;
+      PROD_DB_USERNAME?: string;
+      PROD_DB_PASSWORD?: string;
+      PROD_DB_DATABASE?: string;
     }
   }
 

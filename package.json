@@ -2,7 +2,7 @@
   "name": "invitelogger-api",
   "version": "1.0.0",
   "description": "invitelogger api",
-  "main": "./bin/src/app.js",
+  "main": "./bin/src/server.js",
   "type": "module",
   "private": true,
   "scripts": {

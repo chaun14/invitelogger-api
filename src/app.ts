@@ -1,80 +1,48 @@
-import "reflect-metadata";
-import "dotenv/config.js";
-
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
 
-// middlewares
+// Middleware
 import httpLogger from "@middlewares/httpLogger.js";
 import errorHandler from "@middlewares/errorHandler.js";
 
-// routes
+// Router
 import v1Router from "@routes/v1/router.js";
 import internalsRouter from "@routes/internals/router.js";
 
-// logger
-import logger, { Level } from "@utils/logger.js";
+const app: Express = express(); // Creates Express
 
-// config
-import config, { Environments } from "@config";
-import { botDataSource, dashDataSource } from "@config/orm";
+app.use(httpLogger); // Logs HTTP requests
 
-const app: Express = express();
-const PORT: number | string = config.port ? Number(config.port) : 5780;
+app.use(express.urlencoded({ extended: false })); // Parses URL-encoded bodies
+app.use(express.json()); // Parses JSON bodies
 
-// initialize data sources (typeorm)
-const initializeDataSources = async (): Promise<void> => {
-  await botDataSource.initialize();
-  logger(Level.Info, "Connection to bot database initialized");
+// Middleware to capture raw request body
+app.use(
+  express.raw({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) })
+);
 
-  await dashDataSource.initialize();
-  logger(Level.Info, "Connection to dash database initialized");
-};
-
-// start app
-const main = async (): Promise<void> => {
-  await initializeDataSources();
-
-  app.use(httpLogger);
-
-  app.use(express.urlencoded({ extended: false }));
-  app.use(express.json());
-
-  app.use(
-    express.raw({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) })
-  );
-
-  app.use(
-    cors({
-      origin: "*",
-      methods: ["GET", "POST"],
-      allowedHeaders: ["origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-    })
-  );
-
-  /*
-   * TODO-01: Switch to a global "internal" prefix
-   */
-  app.use("/", internalsRouter);
-  app.use("/v1", v1Router);
-
-  app.use((_req: Request, res: Response) => {
-    res.status(404).json({ message: "Resource Not Found" });
-  });
-
-  app.use(errorHandler);
-
-  app.listen(PORT, () => logger(Level.Info, `Server running on port ${PORT}`));
-};
-
-main()
-  .then(async () => {
-    if (config.environment === Environments.Development) {
-      const endpoints = (await import("express-list-endpoints")).default;
-      console.log(endpoints(app));
-    }
+// Configures CORS policy
+app.use(
+  cors({
+    origin: "*", // Allows all origins
+    methods: ["GET", "POST"], // Allowed methods
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"], // Allowed headers
   })
-  .catch((reason: any): void => {
-    logger(Level.Error, reason);
-    process.exit(1);
-  });
+);
+
+// Route setup
+app.use("/", internalsRouter);
+app.use("/v1", v1Router);
+
+// Redirect to public API
+app.get("/", (_req: Request, res: Response) => res.redirect("/v1"));
+
+// Not Found handler
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({ message: "Resource Not Found" });
+});
+
+// Global error handling
+app.use(errorHandler);
+
+export default app;
