@@ -1,5 +1,7 @@
 import { Router, Request, Response } from "express";
 
+import { v1Auth } from "@middlewares/authenticate.js";
+
 import invitesRouter from "@routes/v1/invites/invitesRouter.js";
 import authRouter from "@routes/v1/auth/authRouter.js";
 
@@ -12,7 +14,7 @@ router.get("/", (_req: Request, res: Response) => {
   });
 });
 
-router.use("/invites", invitesRouter);
-router.use("/auth", authRouter);
+router.use("/invites", v1Auth, invitesRouter);
+router.use("/auth", v1Auth, authRouter);
 
 export default router;

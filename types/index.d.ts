@@ -33,7 +33,7 @@ declare global {
 
   namespace Express {
     export interface Request {
-      tokenAuth?: Applications;
+      authenticate?: Applications;
       rawBody: Buffer;
     }
   }
