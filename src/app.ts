@@ -1,24 +1,22 @@
 import "reflect-metadata";
 import "dotenv/config.js";
 
-import express, { Express, NextFunction, Request, Response } from "express";
+import express, { Express, Request, Response } from "express";
+import cors from "cors";
 
 // middlewares
 import httpLogger from "@middlewares/httpLogger.js";
 import errorHandler from "@middlewares/errorHandler.js";
 
 // routes
-import v1 from "@routes/v1.js";
-import payments from "@routes/payments/tebex.js";
-import votes from "@routes/votes/index.js";
-import internal from "@routes/internal/index.js";
-import migration from "@routes/integrations/index.js";
+import v1Router from "@routes/v1/router.js";
+import internalsRouter from "@routes/internals/router.js";
 
 // logger
 import logger, { Level } from "@utils/logger.js";
 
 // config
-import config from "@config";
+import config, { Environments } from "@config";
 import { botDataSource, dashDataSource } from "@config/orm";
 
 const app: Express = express();
@@ -42,40 +40,26 @@ const main = async (): Promise<void> => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
 
-  app.use((req: Request, _res: Response, next: NextFunction): void => {
-    req.rawBody = Buffer.alloc(0);
+  app.use(
+    express.raw({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) })
+  );
 
-    req.on("data", (chunk): void => {
-      req.rawBody = Buffer.concat([req.rawBody, chunk]);
-    });
+  app.use(
+    cors({
+      origin: "*",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+    })
+  );
 
-    next();
-  });
-
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-
-    if (req.method === "OPTIONS") {
-      res.header("Access-Control-Allow-Methods", "GET, POST");
-      res.status(200).json({});
-    } else {
-      next();
-    }
-  });
-
-  app.use("/", payments);
-  app.use("/", votes);
-  app.use("/v1", v1);
-  app.use("/internal", internal);
-  app.use("/integrations", migration);
-  app.get("/", (_req: Request, res: Response) => res.redirect("/v1"));
+  /*
+   * TODO-01: Switch to a global "internal" prefix
+   */
+  app.use("/", internalsRouter);
+  app.use("/v1", v1Router);
 
   app.use((_req: Request, res: Response) => {
-    res.status(404).json({ message: "not found" });
+    res.status(404).json({ message: "Resource Not Found" });
   });
 
   app.use(errorHandler);
@@ -83,7 +67,14 @@ const main = async (): Promise<void> => {
   app.listen(PORT, () => logger(Level.Info, `Server running on port ${PORT}`));
 };
 
-main().catch((reason: any): void => {
-  logger(Level.Error, reason);
-  process.exit(1);
-});
+main()
+  .then(async () => {
+    if (config.environment === Environments.Development) {
+      const endpoints = (await import("express-list-endpoints")).default;
+      console.log(endpoints(app));
+    }
+  })
+  .catch((reason: any): void => {
+    logger(Level.Error, reason);
+    process.exit(1);
+  });
