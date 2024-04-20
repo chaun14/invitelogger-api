@@ -1,17 +1,24 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
+export enum Platform {
+  TOPGG = "topgg",
+  VCODES = "vcodes",
+  DLIST = "dlist",
+  WUMPUS = "wumpus.store",
+}
+
 @Entity()
 export class Votes {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
-  @Column()
-  bot_id: string;
+  @Column({ name: "bot_id", type: "varchar" })
+  botId: string;
 
-  @Column()
-  user_id: string;
+  @Column({ name: "user_id", type: "varchar" })
+  userId: string;
 
-  @Column({ type: "enum", default: "topgg", enum: ["topgg", "vcodes", "dlist"] })
+  @Column({ type: "enum", default: Platform.TOPGG, enum: Platform })
   platform: string;
 
   @Column({ type: "boolean", default: false })

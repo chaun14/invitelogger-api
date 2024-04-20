@@ -16,54 +16,42 @@ export class PremiumPlans {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
-  @Column({ type: "varchar", nullable: false })
-  name!: string;
+  @Column({ type: "varchar" })
+  name: string;
 
-  @Column({
-    type: "enum",
-    enum: PremiumPlanCategory,
-    nullable: false,
-  })
+  @Column({ type: "enum", enum: PremiumPlanCategory })
   category: PremiumPlanCategory;
 
-  @Column({ type: "bool", default: false })
+  @Column({ type: "boolean", default: false })
   oneTime: boolean;
 
-  @Column({ type: "bool", default: true })
+  @Column({ type: "boolean", default: true })
   enabled: boolean;
 
   @Column({ type: "text", nullable: true })
-  image!: string;
+  image: string | null;
 
   @Column({ type: "json", nullable: true })
-  config!: { maxGuilds?: number };
+  config: { maxGuilds: number | null } | null;
 
   @Column({ type: "varchar", nullable: true })
-  description!: string;
+  description: string | null;
 
-  @Column({ type: "bool", default: true })
+  @Column({ type: "boolean", default: true })
   visible: boolean;
 
-  @Column({
-    type: "enum",
-    enum: PremiumPlanPeriod,
-    nullable: false,
-  })
+  @Column({ type: "enum", enum: PremiumPlanPeriod })
   period: PremiumPlanPeriod;
 
-  @Column({ type: "varchar", nullable: true, default: null })
-  tebexPackageId!: string;
+  @Column({ type: "varchar", nullable: true })
+  tebexPackageId: string | null;
 
-  @Column({ type: "varchar", nullable: true, default: null })
-  tebexStoreUrl!: string;
+  @Column({ type: "varchar", nullable: true })
+  tebexStoreUrl: string | null;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   createdAt: Date;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   updatedAt: Date;
 }

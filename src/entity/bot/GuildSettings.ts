@@ -2,17 +2,15 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity({ name: "guildSettings" })
 export class GuildSettings {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
-  @Column()
-  guild_id: string;
+  @Column({ name: "guild_id", type: "varchar" })
+  guildId: string;
 
-  @Column()
-  bot_id: string;
+  @Column({ name: "bot_id", type: "varchar" })
+  botId: string;
 
-  @Column({
-    type: "json",
-  })
+  @Column({ type: "json" })
   integrations: { dc?: { enabled: boolean } };
 }

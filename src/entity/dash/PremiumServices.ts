@@ -18,48 +18,36 @@ export class PremiumServices {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
-  @Column({ type: "varchar", nullable: false })
-  user_id!: string;
+  @Column({ name: "user_id", type: "varchar" })
+  userId: string;
 
-  @Column({
-    type: "enum",
-    enum: PremiumServiceStatus,
-    nullable: false,
-  })
+  @Column({ type: "enum", enum: PremiumServiceStatus })
   status: PremiumServiceStatus;
 
-  @Column({ type: "varchar", nullable: false })
-  plan_id!: string;
+  @Column({ name: "plan_id", type: "varchar" })
+  planId: string;
 
   @Column({ type: "varchar", nullable: true })
   subscriptionReference!: string | null;
 
-  @Column({ type: "datetime", nullable: true, default: null })
-  subEndedAt!: string;
+  @Column({ type: "datetime", nullable: true })
+  subEndedAt: string | null;
 
   @Column({ type: "date", nullable: true })
-  renewedAt!: string;
+  renewedAt: string | null;
 
   @Column({ type: "date", nullable: true })
-  suspendedAt!: string | null;
+  suspendedAt: string | null;
 
   @Column({ type: "date", nullable: true })
-  nextDue!: string;
+  nextDue: string | null;
 
-  @Column({
-    type: "enum",
-    enum: PremiumServiceType,
-    nullable: false,
-  })
+  @Column({ type: "enum", enum: PremiumServiceType })
   type: PremiumServiceType;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   createdAt: string;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   updatedAt: string;
 }

@@ -13,46 +13,42 @@ export class Payments {
   id: string;
 
   @Index()
-  @Column({ type: "varchar", nullable: false })
+  @Column({ type: "varchar" })
   payment_id!: string;
 
-  @Column({ type: "float", nullable: false, precision: 2 })
+  @Column({ type: "float", precision: 2 })
   amount!: number;
 
   @Column({ type: "datetime" })
   date: Date;
 
-  @Column({ type: "varchar", nullable: false })
-  status!: string;
-  @Column({ type: "varchar", nullable: false })
-  currency!: string;
+  @Column({ type: "varchar" })
+  status: string;
+
+  @Column({ type: "varchar" })
+  currency: string;
+
   @Column({ type: "varchar", nullable: true })
-  mail!: string | null;
-  @Column({ type: "varchar", nullable: false })
-  username!: string;
-  @Column({ type: "varchar", nullable: false })
-  discord_id!: string;
+  mail: string | null;
 
-  @Column({ type: "varchar", nullable: true, default: true })
-  subscriptionReference!: string | null;
+  @Column({ type: "varchar" })
+  username: string;
 
-  @Column({ type: "json", nullable: false })
-  packages!: string[];
+  @Column({ type: "varchar" })
+  discord_id: string;
 
-  @Column({
-    type: "datetime",
-    nullable: true,
-    default: null,
-  })
-  refundedAt: Date;
+  @Column({ type: "varchar", nullable: true })
+  subscriptionReference: string | null;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "json" })
+  packages: string[];
+
+  @Column({ type: "datetime", nullable: true })
+  refundedAt: Date | null;
+
+  @Column({ type: "datetime" })
   createdAt: Date;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   updatedAt: Date;
 }

@@ -17,57 +17,39 @@ export enum InvalidatedReason {
 
 @Entity()
 export class Joins {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
-  @Column()
-  guild_id: string;
+  @Column({ name: "guild_id", type: "varchar" })
+  guildId: string;
 
-  @Column({
-    type: "enum",
-    enum: JoinType,
-    nullable: true,
-  })
-  type: JoinType;
+  @Column({ type: "enum", enum: JoinType, nullable: true })
+  type: JoinType | null;
 
-  @Column()
-  bot_id: string;
+  @Column({ name: "bot_id", type: "varchar" })
+  botId: string;
 
-  @Column({
-    nullable: true,
-  })
-  code: string;
+  @Column({ nullable: true })
+  code: string | null;
 
-  @Column()
-  member_id: string;
+  @Column({ name: "member_id", type: "varchar" })
+  memberId: string;
 
-  @Column({
-    nullable: true,
-  })
-  inviter_id: string;
+  @Column({ name: "inviter_id", type: "varchar", nullable: true })
+  inviterId: string | null;
 
-  @Column({ type: "bool" })
+  @Column({ type: "boolean" })
   cleared: boolean;
 
-  @Column({
-    type: "enum",
-    enum: InvalidatedReason,
-    nullable: true,
-  })
+  @Column({ type: "enum", enum: InvalidatedReason, nullable: true })
   invalidated: InvalidatedReason | null;
 
-  @Column({
-    type: "int",
-  })
+  @Column({ type: "int" })
   fakeCode: number;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   createdAt: Date;
 
-  @Column({
-    type: "datetime",
-  })
+  @Column({ type: "datetime" })
   updatedAt: Date;
 }
