@@ -29,7 +29,7 @@ export class Joins {
   @Column({ name: "bot_id", type: "varchar" })
   botId: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   code: string | null;
 
   @Column({ name: "member_id", type: "varchar" })
