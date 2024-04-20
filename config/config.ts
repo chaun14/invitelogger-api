@@ -1,8 +1,8 @@
 const { env } = process;
 
 export enum Environments {
-  Development,
-  Production,
+  DEVELOPMENT,
+  PRODUCTION,
 }
 
 const config = {
@@ -10,7 +10,7 @@ const config = {
   port: env.PORT,
 
   // Environment type (development || production)
-  environment: env.NODE_ENV === "production" ? Environments.Production : Environments.Development,
+  environment: env.NODE_ENV === "production" ? Environments.PRODUCTION : Environments.DEVELOPMENT,
 
   // Webhook configurations for votes
   voteWebhooks: {

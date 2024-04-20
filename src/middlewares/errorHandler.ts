@@ -7,13 +7,13 @@ const errorHandler: ErrorRequestHandler = (err, _req: Request, res: Response) =>
   const statusCode = res.statusCode === 200 ? err.statusCode || 500 : res.statusCode;
   res.status(statusCode);
 
-  logger(Level.Error, err);
+  logger(Level.ERROR, err);
 
   const body: { message: string; stack?: string } = {
     message: statusCode === 500 ? "Something went wrong on our end" : err.message,
   };
 
-  if (config.environment === Environments.Development) {
+  if (config.environment === Environments.DEVELOPMENT) {
     body.stack = err.stack;
   }
 

@@ -24,7 +24,7 @@ const createDataSourceOptions = (name: string): DataSourceOptions => ({
   username: config.databases[name]["username"]!,
   password: config.databases[name]["password"]!,
   database: config.databases[name]["database"]!,
-  synchronize: config.environment === Environments.Development,
+  synchronize: config.environment === Environments.DEVELOPMENT,
   logging: ["error"],
   entities: entities[name],
 });

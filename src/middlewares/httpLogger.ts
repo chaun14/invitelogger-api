@@ -12,7 +12,7 @@ const httpLogger = (req: Request, res: Response, next: NextFunction) => {
     const contentLength = res.get("Content-Length") || "0";
 
     const message = `${req.ip} - - "${method} ${originalUrl} HTTP/${req.httpVersion}" ${statusCode} ${statusMessage} ${contentLength} - ${duration} ms`;
-    logger(Level.Http, message);
+    logger(Level.HTTP, message);
   });
 
   next();

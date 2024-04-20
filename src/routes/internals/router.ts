@@ -9,9 +9,9 @@ import votesRouter from "@routes/internals/votes/voteRouter.js";
 
 const router = Router();
 
-router.use("/payments", authenticate(AuthenticateType.Payment), paymentsRouter);
-router.use("/votes", authenticate(AuthenticateType.Vote), votesRouter);
-router.use("/integrations", authenticate(AuthenticateType.Integration), integrationsRouter);
-router.use("/internal", authenticate(AuthenticateType.Email), emailRouter);
+router.use("/payments", authenticate(AuthenticateType.PAYMENT), paymentsRouter);
+router.use("/votes", authenticate(AuthenticateType.VOTE), votesRouter);
+router.use("/integrations", authenticate(AuthenticateType.INTEGRATION), integrationsRouter);
+router.use("/internal", authenticate(AuthenticateType.EMAIL), emailRouter);
 
 export default router;

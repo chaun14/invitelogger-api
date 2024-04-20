@@ -13,7 +13,7 @@ router.get("/", (_req: Request, res: Response) => {
   });
 });
 
-router.use("/invites", authenticate(AuthenticateType.Public), invitesRouter);
-router.use("/auth", authenticate(AuthenticateType.Public), authRouter);
+router.use("/invites", authenticate(AuthenticateType.PUBLIC), invitesRouter);
+router.use("/auth", authenticate(AuthenticateType.PUBLIC), authRouter);
 
 export default router;

@@ -7,11 +7,11 @@ import config from "@config";
 import { dashDataSource } from "@config/orm";
 
 export enum AuthenticateType {
-  Payment,
-  Integration,
-  Email,
-  Public,
-  Vote,
+  PAYMENT,
+  INTEGRATION,
+  EMAIL,
+  PUBLIC,
+  VOTE,
 }
 
 const getToken = (authorization: string | undefined, withoutBearer: boolean = false): string | null => {
@@ -26,7 +26,7 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
   }
 
   switch (authType) {
-    case AuthenticateType.Public:
+    case AuthenticateType.PUBLIC:
       // eslint-disable-next-line no-case-declarations
       const application = await dashDataSource.manager.findOne(Applications, { where: { token } });
       if (application) {
@@ -34,13 +34,13 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
         return true;
       }
       break;
-    case AuthenticateType.Email:
+    case AuthenticateType.EMAIL:
       return token === config.internalApiKey;
-    case AuthenticateType.Payment:
+    case AuthenticateType.PAYMENT:
       return crypto.createHmac("sha256", token).update(req.rawBody).digest("hex") === config.tebexKey;
-    case AuthenticateType.Integration:
+    case AuthenticateType.INTEGRATION:
       return token === config.dcApiKey;
-    case AuthenticateType.Vote:
+    case AuthenticateType.VOTE:
       return token === config.voteWebhooks[req.path.substring(1)];
   }
 
@@ -49,8 +49,8 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
 
 const authenticate = (authType: AuthenticateType) => async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const tokenSource = authType === AuthenticateType.Payment ? req.get("X-Signature") : req.headers.authorization;
-    const token = getToken(tokenSource, authType === AuthenticateType.Vote);
+    const tokenSource = authType === AuthenticateType.PAYMENT ? req.get("X-Signature") : req.headers.authorization;
+    const token = getToken(tokenSource, authType === AuthenticateType.VOTE);
 
     if (await verifyToken(token, req, authType)) {
       next();
