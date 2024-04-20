@@ -1,118 +1,76 @@
 import { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
 
 import { Applications } from "@entity/dash/Applications.js";
 
 import config from "@config";
 import { dashDataSource } from "@config/orm";
 
+export enum AuthenticateType {
+  Payment,
+  Integration,
+  Email,
+  Public,
+  Vote,
+}
+
 const getToken = (
-  authorization?: string,
-  options: { withBearer: boolean } = { withBearer: true }
+  authorization: string | undefined,
+  withoutBearer: boolean = false
 ): string | null => {
-  if (authorization) {
-    if (!options.withBearer) {
-      return authorization;
-    }
-
-    if (authorization.startsWith("Bearer ")) {
-      return authorization.slice(7);
-    }
-  }
-
-  return null;
+  return authorization && (!withoutBearer || !authorization.startsWith("Bearer "))
+    ? authorization.replace("Bearer ", "")
+    : null;
 };
 
-export const internalAuth = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const token = getToken(req.headers.authorization);
-    if (!token) {
-      res.status(401).json({ message: "Authorization token is required" });
-      return;
-    }
-
-    if (token !== config.internalApiKey) {
-      res.status(401).json({ message: "Invalid token" });
-      return;
-    }
-
-    next();
-  } catch (error) {
-    next(error);
+const verifyToken = async (
+  token: string | null,
+  req: Request,
+  authType: AuthenticateType
+): Promise<boolean> => {
+  if (!token) {
+    return false;
   }
+
+  switch (authType) {
+    case AuthenticateType.Public:
+      // eslint-disable-next-line no-case-declarations
+      const application = await dashDataSource.manager.findOne(Applications, { where: { token } });
+      if (application) {
+        req.authenticate = application;
+        return true;
+      }
+      break;
+    case AuthenticateType.Email:
+      return token === config.internalApiKey;
+    case AuthenticateType.Payment:
+      return (
+        crypto.createHmac("sha256", token).update(req.rawBody).digest("hex") === config.tebexKey
+      );
+    case AuthenticateType.Integration:
+      return token === config.dcApiKey;
+    case AuthenticateType.Vote:
+      return token === config.voteWebhooks[req.path.substring(1)];
+  }
+
+  return false;
 };
 
-export const integrationAuth = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const token = getToken(req.headers.authorization);
-    if (!token) {
-      res.status(401).json({ message: "Authorization token is required" });
-      return;
+const authenticate =
+  (authType: AuthenticateType) => async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const tokenSource =
+        authType === AuthenticateType.Payment ? req.get("X-Signature") : req.headers.authorization;
+      const token = getToken(tokenSource, authType === AuthenticateType.Vote);
+
+      if (await verifyToken(token, req, authType)) {
+        next();
+      } else {
+        res.status(401).json({ message: "Invalid or missing authorization token" });
+      }
+    } catch (error) {
+      next(error);
     }
+  };
 
-    if (token !== config.dcApiKey) {
-      res.status(401).json({ message: "Invalid token" });
-      return;
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const voteAuth = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const token = getToken(req.headers.authorization, { withBearer: false });
-    if (!token) {
-      res.status(401).json({ message: "Authorization token is required" });
-      return;
-    }
-
-    let key: string | undefined;
-
-    switch (req.path) {
-      case "/topgg":
-        key = config.voteWebhooks.topGG;
-        break;
-      case "/dlist":
-        key = config.voteWebhooks.dList;
-        break;
-      case "/vcodes":
-        key = config.voteWebhooks.vCodes;
-        break;
-      case "/wumpus":
-        key = config.voteWebhooks.wumpusStore;
-        break;
-    }
-
-    if (token !== key) {
-      res.status(401).json({ message: "Invalid token" });
-      return;
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const v1Auth = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const token = getToken(req.headers.authorization);
-    if (!token) {
-      res.status(401).json({ message: "Authorization token is required" });
-      return;
-    }
-
-    const application = await dashDataSource.manager.findOne(Applications, { where: { token } });
-    if (!application) {
-      res.status(401).json({ message: "Invalid token" });
-      return;
-    }
-
-    req.authenticate = application;
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
+export default authenticate;
