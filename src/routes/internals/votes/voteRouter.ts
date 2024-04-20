@@ -1,11 +1,6 @@
 import { Router } from "express";
 
-import {
-  handleTopGG,
-  handleDLIst,
-  handleVCode,
-  handleWumpus,
-} from "@controllers/internals/votes/votesController.js";
+import { handleTopGG, handleDLIst, handleVCode, handleWumpus } from "@controllers/internals/votes/votesController.js";
 
 const votesRouter = Router();
 

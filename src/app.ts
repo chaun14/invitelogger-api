@@ -17,9 +17,7 @@ app.use(express.urlencoded({ extended: false })); // Parses URL-encoded bodies
 app.use(express.json()); // Parses JSON bodies
 
 // Middleware to capture raw request body
-app.use(
-  express.raw({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) })
-);
+app.use(express.raw({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) }));
 
 // Configures CORS policy
 app.use(

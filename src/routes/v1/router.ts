@@ -9,8 +9,7 @@ const router = Router();
 
 router.get("/", (_req: Request, res: Response) => {
   res.send({
-    message:
-      "Welcome to inviteLogger api. Find our documentation here: https://developers.invitelogger.me",
+    message: "Welcome to inviteLogger api. Find our documentation here: https://developers.invitelogger.me",
   });
 });
 
