@@ -14,10 +14,10 @@ const config = {
 
   // Webhook configurations for votes
   voteWebhooks: {
-    topGG: env.TOPGG_VOTE_WEBHOOK,
-    vCodes: env.VCODES_VOTE_WEBHOOK,
-    dList: env.DLIST_VOTE_WEBHOOK,
-    wumpusStore: env.WUMPUSSTORE_VOTE_WEBHOOK,
+    topgg: env.TOPGG_VOTE_WEBHOOK,
+    vcodes: env.VCODES_VOTE_WEBHOOK,
+    dlist: env.DLIST_VOTE_WEBHOOK,
+    wumpus: env.WUMPUSSTORE_VOTE_WEBHOOK,
   },
 
   // Tebex payment API key
