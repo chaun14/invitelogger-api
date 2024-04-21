@@ -12,7 +12,7 @@ export enum InvalidatedReason {
   SELF = "self",
   UNKNOWN = "unknow",
   YOUNG = "young",
-  NEWFAKE = "newfake",
+  NEW_FAKE = "newfake",
 }
 
 @Entity()

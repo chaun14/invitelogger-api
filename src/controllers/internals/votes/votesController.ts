@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { verify } from "jsonwebtoken";
+import { NextFunction, Request, Response } from "express";
+import jsonwebtoken from "jsonwebtoken";
 
 import Votes, { Platform } from "@entity/dash/Votes.js";
 
@@ -29,110 +29,126 @@ type DlistBody = {
   user_id: string;
 };
 
-export const handleTopGG = async (req: Request, res: Response) => {
-  const { body }: { body?: TopggBody } = req;
+export const handleTopGG = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { body }: { body?: TopggBody } = req;
 
-  if (!body || !body?.user || !body?.bot || !body?.isWeekend) {
-    res.status(400).json({ message: "Missing parameter" });
-    return;
-  }
+    if (!body || !body?.user || !body?.bot || !body?.isWeekend) {
+      res.status(400).json({ message: "Missing parameter" });
+      return;
+    }
 
-  if (config.botId !== body.bot) {
-    res.status(403).send({ message: "Invalid bot id" });
-    return;
-  }
-
-  res.status(200).send({ message: "Vote received" });
-
-  await dashDataSource.manager.insert(Votes, {
-    userId: body.user,
-    botId: config.botId,
-    weekend: body.isWeekend,
-    platform: Platform.TOPGG,
-  });
-};
-
-export const handleVCode = async (req: Request, res: Response) => {
-  const { body }: { body?: VcodeBody } = req;
-
-  if (!body || !body?.user?.id || !body?.trigger) {
-    res.status(400).json({ message: "Missing parameter" });
-    return;
-  }
-
-  if (body.trigger !== "vote") {
-    res.status(400).json({ message: "Invalid trigger" });
-    return;
-  }
-
-  const { params }: { params: { bot_id?: string } } = req;
-
-  if (params && params?.bot_id) {
-    if (config.botId !== params?.bot_id) {
+    if (config.botId !== body.bot) {
       res.status(403).send({ message: "Invalid bot id" });
       return;
     }
+
+    res.status(200).send({ message: "Vote received" });
+
+    await dashDataSource.manager.insert(Votes, {
+      userId: body.user,
+      botId: config.botId,
+      weekend: body.isWeekend,
+      platform: Platform.TOPGG,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  res.status(200).send({ message: "Vote received" });
-
-  await dashDataSource.manager.insert(Votes, {
-    userId: body.user.id,
-    botId: config.botId,
-    weekend: false,
-    platform: Platform.VCODES,
-  });
 };
 
-export const handleWumpus = async (req: Request, res: Response) => {
-  const { body }: { body?: WumpusBody } = req;
+export const handleVCode = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { body }: { body?: VcodeBody } = req;
 
-  if (!body || !body?.botId || !body?.userId) {
-    res.status(400).json({ message: "Missing parameter" });
-    return;
+    if (!body || !body?.user?.id || !body?.trigger) {
+      res.status(400).json({ message: "Missing parameter" });
+      return;
+    }
+
+    if (body.trigger !== "vote") {
+      res.status(400).json({ message: "Invalid trigger" });
+      return;
+    }
+
+    const { params }: { params: { bot_id?: string } } = req;
+
+    if (params && params?.bot_id) {
+      if (config.botId !== params?.bot_id) {
+        res.status(403).send({ message: "Invalid bot id" });
+        return;
+      }
+    }
+
+    res.status(200).send({ message: "Vote received" });
+
+    await dashDataSource.manager.insert(Votes, {
+      userId: body.user.id,
+      botId: config.botId,
+      weekend: false,
+      platform: Platform.VCODES,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  if (config.botId !== body.botId) {
-    res.status(403).send({ message: "Invalid bot id" });
-    return;
-  }
-
-  res.status(200).send({ message: "Vote received" });
-
-  await dashDataSource.manager.insert(Votes, {
-    userId: body.userId,
-    botId: config.botId,
-    weekend: false,
-    platform: Platform.WUMPUS,
-  });
 };
 
-export const handleDLIst = async (req: Request, res: Response) => {
-  const { body } = req;
+export const handleWumpus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { body }: { body?: WumpusBody } = req;
 
-  if (!body) {
-    res.status(400).json({ message: "Missing parameter" });
-    return;
+    if (!body || !body?.botId || !body?.userId) {
+      res.status(400).json({ message: "Missing parameter" });
+      return;
+    }
+
+    if (config.botId !== body.botId) {
+      res.status(403).send({ message: "Invalid bot id" });
+      return;
+    }
+
+    res.status(200).send({ message: "Vote received" });
+
+    await dashDataSource.manager.insert(Votes, {
+      userId: body.userId,
+      botId: config.botId,
+      weekend: false,
+      platform: Platform.WUMPUS,
+    });
+  } catch (error) {
+    next(error);
   }
+};
 
-  const dlistBody = verify(body, config.voteWebhooks.dlist!) as DlistBody;
+export const handleDLIst = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { body } = req;
 
-  if (!dlistBody || !dlistBody?.bot_id || !dlistBody?.user_id) {
-    res.status(403).json({ message: "Invalid Authorization" });
-    return;
+    if (!body) {
+      res.status(400).json({ message: "Missing parameter" });
+      return;
+    }
+
+    const dlistBody = jsonwebtoken.verify(body, config.voteWebhooks.dlist!) as DlistBody;
+
+    if (!dlistBody || !dlistBody?.bot_id || !dlistBody?.user_id) {
+      res.status(403).json({ message: "Invalid Authorization" });
+      return;
+    }
+
+    if (config.botId !== dlistBody.bot_id) {
+      res.status(403).send({ message: "Invalid bot id" });
+      return;
+    }
+
+    res.status(200).send({ message: "Vote received" });
+
+    await dashDataSource.manager.insert(Votes, {
+      userId: dlistBody.user_id,
+      botId: config.botId,
+      weekend: false,
+      platform: Platform.DLIST,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  if (config.botId !== dlistBody.bot_id) {
-    res.status(403).send({ message: "Invalid bot id" });
-    return;
-  }
-
-  res.status(200).send({ message: "Vote received" });
-
-  await dashDataSource.manager.insert(Votes, {
-    userId: dlistBody.user_id,
-    botId: config.botId,
-    weekend: false,
-    platform: Platform.DLIST,
-  });
 };
