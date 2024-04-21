@@ -1,7 +1,7 @@
 import sendGrid from "@sendgrid/mail";
 
 import config from "@config";
-import logger, { Level } from "@utils/logger";
+import logger, { Level } from "@utils/logger.js";
 
 export const sendEmail = async (
   to: string,
