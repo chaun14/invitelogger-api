@@ -63,7 +63,7 @@ export const handleDoubleCounter = async (req: Request, res: Response, next: Nex
   }
 };
 
-async function restoreFakeData(code: number) {
+const restoreFakeData = async (code: number) => {
   const fakeReasonKeys: string[] = [];
 
   for (const item of fakeTypesList) {
@@ -74,16 +74,16 @@ async function restoreFakeData(code: number) {
   }
 
   return fakeReasonKeys;
-}
+};
 
-async function removeFakeReason(currentFakeCode: number, fakeType: number) {
+const removeFakeReason = async (currentFakeCode: number, fakeType: number) => {
   const fakeTypeData = fakeTypesList.find((fake) => fake.id === fakeType);
   if (!fakeTypeData) {
     throw new Error("Invalid fake type");
   }
 
   return currentFakeCode ^ fakeTypeData.code;
-}
+};
 
 enum FakeTypes {
   YOUNG = 1,
