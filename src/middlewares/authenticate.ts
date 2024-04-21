@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 
-import { Applications } from "@entity/dash/Applications.js";
+import Applications from "@entity/dash/Applications.js";
 
 import config, { Environments } from "@config";
 import { dashDataSource } from "@config/orm";

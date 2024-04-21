@@ -8,7 +8,7 @@ export enum Platform {
 }
 
 @Entity()
-export class Votes {
+class Votes {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
@@ -30,3 +30,5 @@ export class Votes {
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 }
+
+export default Votes;

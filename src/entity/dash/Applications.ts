@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
-export class Applications {
+class Applications {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
@@ -17,3 +17,5 @@ export class Applications {
   @Column({ name: "guild_id", type: "varchar" })
   guildId: string;
 }
+
+export default Applications;

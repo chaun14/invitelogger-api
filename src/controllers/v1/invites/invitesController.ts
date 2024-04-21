@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 
 import { botDataSource } from "@config/orm";
 
-import { Joins, InvalidatedReason } from "@entity/bot/Joins.js";
-import { CustomInvites } from "@entity/bot/CustomInvites.js";
-import { Applications } from "@entity/dash/Applications.js";
+import Joins, { InvalidatedReason } from "@entity/bot/Joins.js";
+import CustomInvites from "@entity/bot/CustomInvites.js";
+import Applications from "@entity/dash/Applications.js";
 
 type CodeBody = {
   guild_id?: string;

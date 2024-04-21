@@ -14,7 +14,7 @@ export enum PremiumServiceStatus {
 }
 
 @Entity("premium_services")
-export class PremiumServices {
+class PremiumServices {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
@@ -28,7 +28,7 @@ export class PremiumServices {
   planId: string;
 
   @Column({ type: "varchar", nullable: true })
-  subscriptionReference!: string | null;
+  subscriptionReference: string | null;
 
   @Column({ type: "datetime", nullable: true })
   subEndedAt: string | null;
@@ -51,3 +51,5 @@ export class PremiumServices {
   @Column({ type: "datetime" })
   updatedAt: string;
 }
+
+export default PremiumServices;

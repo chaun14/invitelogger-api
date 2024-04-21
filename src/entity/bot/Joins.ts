@@ -16,7 +16,7 @@ export enum InvalidatedReason {
 }
 
 @Entity()
-export class Joins {
+class Joins {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
@@ -53,3 +53,5 @@ export class Joins {
   @Column({ type: "datetime" })
   updatedAt: Date;
 }
+
+export default Joins;

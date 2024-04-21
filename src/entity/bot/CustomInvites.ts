@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity({ name: "customInvites" })
-export class CustomInvites {
+class CustomInvites {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
@@ -32,3 +32,5 @@ export class CustomInvites {
   @Column({ type: "varchar" })
   reason: string;
 }
+
+export default CustomInvites;

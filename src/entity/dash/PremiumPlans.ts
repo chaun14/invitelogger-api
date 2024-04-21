@@ -12,7 +12,7 @@ export enum PremiumPlanPeriod {
 }
 
 @Entity("premium_plans")
-export class PremiumPlans {
+class PremiumPlans {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
@@ -55,3 +55,5 @@ export class PremiumPlans {
   @Column({ type: "datetime" })
   updatedAt: Date;
 }
+
+export default PremiumPlans;

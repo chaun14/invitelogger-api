@@ -1,4 +1,4 @@
-import { Applications } from "@entity/dash/Applications";
+import Applications from "@entity/dash/Applications";
 
 declare global {
   namespace NodeJS {

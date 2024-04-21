@@ -1,23 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
 
-export enum PremiumServiceStatus {
-  FAKE = "pending",
-  LEAVE = "active",
-  SELF = "suspended",
-  UNKNOWN = "canceled",
-}
-
 @Entity()
-export class Payments {
+class Payments {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: string;
 
   @Index()
-  @Column({ type: "varchar" })
-  payment_id!: string;
+  @Column({ name: "payment_id", type: "varchar" })
+  paymentId: string;
 
   @Column({ type: "float", precision: 2 })
-  amount!: number;
+  amount: number;
 
   @Column({ type: "datetime" })
   date: Date;
@@ -34,8 +27,8 @@ export class Payments {
   @Column({ type: "varchar" })
   username: string;
 
-  @Column({ type: "varchar" })
-  discord_id: string;
+  @Column({ name: "discord_id", type: "varchar" })
+  discordId: string;
 
   @Column({ type: "varchar", nullable: true })
   subscriptionReference: string | null;
@@ -52,3 +45,5 @@ export class Payments {
   @Column({ type: "datetime" })
   updatedAt: Date;
 }
+
+export default Payments;

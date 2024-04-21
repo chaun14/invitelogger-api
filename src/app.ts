@@ -33,7 +33,9 @@ app.use("/", internalsRouter);
 app.use("/v1", v1Router);
 
 // Redirect to public API
-app.get("/", (_req: Request, res: Response) => res.redirect("/v1"));
+app.get("/", function handleRedirect(_req: Request, res: Response) {
+  res.redirect("/v1");
+});
 
 // Not Found handler
 app.use((_req: Request, res: Response) => {

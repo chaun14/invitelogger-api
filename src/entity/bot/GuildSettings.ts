@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity({ name: "guildSettings" })
-export class GuildSettings {
+class GuildSettings {
   @PrimaryGeneratedColumn({ type: "bigint" })
   id: number;
 
@@ -14,3 +14,5 @@ export class GuildSettings {
   @Column({ type: "json" })
   integrations: { dc?: { enabled: boolean } };
 }
+
+export default GuildSettings;
