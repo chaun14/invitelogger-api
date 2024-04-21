@@ -6,6 +6,9 @@ export enum Environments {
 }
 
 const config = {
+  // Bot Id
+  botId: env.BOT_ID,
+
   // Port number for the server
   port: env.PORT,
 
