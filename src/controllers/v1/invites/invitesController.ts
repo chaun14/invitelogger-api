@@ -1,18 +1,31 @@
 import { NextFunction, Request, Response } from "express";
 
-import { Joins, InvalidatedReason } from "@entity/bot/Joins.js";
-
 import { botDataSource } from "@config/orm";
+
+import { Joins, InvalidatedReason } from "@entity/bot/Joins.js";
 import { CustomInvites } from "@entity/bot/CustomInvites.js";
+import { Applications } from "@entity/dash/Applications.js";
+
+type CodeBody = {
+  guild_id?: string;
+  bot_id?: string;
+  invite_code?: string;
+};
+
+type UserBody = {
+  guild_id?: string;
+  bot_id?: string;
+  inviter_id?: string;
+};
 
 export const handleCode = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.authenticate) {
+    const { authenticate, body }: { authenticate?: Applications; body?: CodeBody } = req;
+
+    if (!authenticate) {
       res.status(500).send({ message: "Authentication error" });
       return;
     }
-
-    const { authenticate, body } = req;
 
     if (!body || !body?.guild_id || !body?.bot_id || !body?.invite_code) {
       res.status(400).json({ message: "Missing parameter" });
@@ -47,13 +60,12 @@ export const handleCode = async (req: Request, res: Response, next: NextFunction
 
 export const handleUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.authenticate) {
+    const { authenticate, body }: { authenticate?: Applications; body?: UserBody } = req;
+
+    if (!authenticate) {
       res.status(500).send({ message: "Authentication error" });
       return;
     }
-
-    const { authenticate, body } = req;
-
     if (!body || !body?.guild_id || !body?.bot_id || !body?.inviter_id) {
       res.status(400).json({ message: "Missing parameter" });
       return;

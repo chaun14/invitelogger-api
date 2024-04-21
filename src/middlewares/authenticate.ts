@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import { Applications } from "@entity/dash/Applications.js";
 
-import config from "@config";
+import config, { Environments } from "@config";
 import { dashDataSource } from "@config/orm";
 
 export enum AuthenticateType {
@@ -27,7 +27,6 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
 
   switch (authType) {
     case AuthenticateType.PUBLIC:
-      // eslint-disable-next-line no-case-declarations
       const application = await dashDataSource.manager.findOne(Applications, { where: { token } });
       if (application) {
         req.authenticate = application;
@@ -37,7 +36,14 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
     case AuthenticateType.EMAIL:
       return token === config.internalApiKey;
     case AuthenticateType.PAYMENT:
-      return crypto.createHmac("sha256", token).update(req.rawBody).digest("hex") === config.tebexKey;
+      if (config.environment === Environments.PRODUCTION) {
+        const hmac = crypto.createHmac("sha256", config.tebexKey!).setEncoding("utf-8");
+        const hash = crypto.createHash("sha256").update(req.rawBody).digest("hex");
+
+        return hmac.update(hash).digest("hex") === req.get("X-Signature");
+      }
+
+      return true;
     case AuthenticateType.INTEGRATION:
       return token === config.dcApiKey;
     case AuthenticateType.VOTE:

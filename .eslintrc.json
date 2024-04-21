@@ -12,6 +12,7 @@
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double"],
     "semi": ["error", "always"],
+    "no-case-declarations": "off",
     "prettier/prettier": "error",
     "@typescript-eslint/no-explicit-any": "off"
   },
