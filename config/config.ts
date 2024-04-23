@@ -31,8 +31,14 @@ const config = {
 
   // Rate limit
   rateLimit: {
-    max: env.RATE_LIMIT_ACCESS ? Number(env.RATE_LIMIT_ACCESS) : 100,
-    time: parseRateLimitTime(env.RATE_LIMIT_TIME),
+    ip: {
+      max: env.RATE_LIMIT_IP_ACCESS ? Number(env.RATE_LIMIT_IP_TIME) : 100,
+      time: parseRateLimitTime(env.RATE_LIMIT_IP_TIME),
+    },
+    token: {
+      max: env.RATE_LIMIT_TOKEN_ACCESS ? Number(env.RATE_LIMIT_TOKEN_TIME) : 100,
+      time: parseRateLimitTime(env.RATE_LIMIT_TOKEN_TIME),
+    },
   },
 
   // Port number for the server
