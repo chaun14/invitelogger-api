@@ -4,6 +4,7 @@ import cors from "cors";
 // Middleware
 import httpLogger from "@middlewares/httpLogger.js";
 import errorHandler from "@middlewares/errorHandler.js";
+import rateLimit from "@middlewares/rateLimit.js";
 
 // Router
 import v1Router from "@routes/v1/router.js";
@@ -30,7 +31,7 @@ app.use(
 
 // Route setup
 app.use("/", internalsRouter);
-app.use("/v1", v1Router);
+app.use("/v1", rateLimit, v1Router);
 
 // Redirect to public API
 app.get("/", function handleRedirect(_req: Request, res: Response) {
