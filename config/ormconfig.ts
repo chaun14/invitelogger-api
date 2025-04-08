@@ -1,7 +1,5 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 
-import config, { Environments } from "@config";
-
 import Applications from "@entity/dash/Applications.js";
 import Payments from "@entity/dash/Payments.js";
 import PremiumPlans from "@entity/dash/PremiumPlans.js";
@@ -17,6 +15,8 @@ const entities: { dash: object[]; bot: object[]; prod: object[] } = {
   prod: [CustomInvites, GuildSettings, Joins],
 };
 
+import config from "@config";
+
 const createDataSourceOptions = (name: string): DataSourceOptions => ({
   type: "mysql",
   host: config.databases[name]["host"]!,
@@ -24,11 +24,11 @@ const createDataSourceOptions = (name: string): DataSourceOptions => ({
   username: config.databases[name]["username"]!,
   password: config.databases[name]["password"]!,
   database: config.databases[name]["database"]!,
-  synchronize: config.environment === Environments.DEVELOPMENT,
-  logging: ["error"],
+  synchronize: false,
+  logging: ["error", "warn"],
   entities: entities[name],
 });
 
-export const prodDataSource = new DataSource(createDataSourceOptions("prod"));
 export const dashDataSource = new DataSource(createDataSourceOptions("dash"));
-export const botDataSource = new DataSource(createDataSourceOptions("bot"));
+export const customBotDataSource = new DataSource(createDataSourceOptions("bot"));
+export const prodbotDataSource = new DataSource(createDataSourceOptions("prod"));

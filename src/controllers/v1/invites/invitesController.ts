@@ -4,7 +4,9 @@ import Joins, { InvalidatedReason } from "@entity/bot/Joins.js";
 import CustomInvites from "@entity/bot/CustomInvites.js";
 import Applications from "@entity/dash/Applications.js";
 
-import { botDataSource } from "@config/orm";
+import { prodbotDataSource } from "@config/orm";
+import { customBotDataSource } from "@config/orm";
+import config from "@config";
 
 type CodeBody = {
   guild_id?: string;
@@ -37,7 +39,15 @@ export const handleCode = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const joins = await botDataSource.manager.find(Joins, {
+    // Check if the bot is custom or not
+    let dataSource;
+    if (authenticate.botId == config.botId) {
+      dataSource = prodbotDataSource;
+    } else {
+      dataSource = customBotDataSource;
+    }
+
+    const joins = await dataSource.manager.find(Joins, {
       where: { guildId: body.guild_id, botId: body.bot_id, code: body.invite_code },
     });
 
@@ -76,7 +86,15 @@ export const handleUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const joins = await botDataSource.manager.find(Joins, {
+    // Check if the bot is custom or not
+    let dataSource;
+    if (authenticate.botId == config.botId) {
+      dataSource = prodbotDataSource;
+    } else {
+      dataSource = customBotDataSource;
+    }
+
+    const joins = await dataSource.manager.find(Joins, {
       where: {
         guildId: body.guild_id,
         botId: body.bot_id,
@@ -84,7 +102,7 @@ export const handleUser = async (req: Request, res: Response, next: NextFunction
         cleared: false,
       },
     });
-    const bonuses = await botDataSource.manager.find(CustomInvites, {
+    const bonuses = await dataSource.manager.find(CustomInvites, {
       where: {
         guildId: body.guild_id,
         botId: body.bot_id,

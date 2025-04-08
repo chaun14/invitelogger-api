@@ -4,7 +4,7 @@ import GuildSettings from "@entity/bot/GuildSettings.js";
 import Joins, { InvalidatedReason } from "@entity/bot/Joins.js";
 
 import config from "@config";
-import { prodDataSource } from "@config/orm";
+import { prodbotDataSource } from "@config/orm";
 
 type DcBody = {
   guild_id: string;
@@ -20,7 +20,7 @@ export const handleDoubleCounter = async (req: Request, res: Response, next: Nex
       return;
     }
 
-    const guildSettings = await prodDataSource.manager.findOne(GuildSettings, {
+    const guildSettings = await prodbotDataSource.manager.findOne(GuildSettings, {
       where: { guildId: body.guild_id, botId: config.botId },
     });
     if (!guildSettings || !guildSettings.integrations?.dc?.enabled) {
@@ -30,7 +30,7 @@ export const handleDoubleCounter = async (req: Request, res: Response, next: Nex
       return;
     }
 
-    const fakeVerification = await prodDataSource.manager.findOne(Joins, {
+    const fakeVerification = await prodbotDataSource.manager.findOne(Joins, {
       where: {
         botId: config.botId,
         guildId: req.body.guild_id,
@@ -53,7 +53,7 @@ export const handleDoubleCounter = async (req: Request, res: Response, next: Nex
         const newFakeCode = await removeFakeReason(fakeVerification.fakeCode, FakeTypes.REQUIRE_DC_VERIF);
         fakeVerification.fakeCode = newFakeCode;
         fakeVerification.invalidated = newFakeCode == 0 ? null : InvalidatedReason.NEW_FAKE;
-        await prodDataSource.manager.save(fakeVerification);
+        await prodbotDataSource.manager.save(fakeVerification);
       }
     }
 
