@@ -15,10 +15,8 @@ const app: Express = express(); // Creates Express
 app.use(httpLogger); // Logs HTTP requests
 
 app.use(express.urlencoded({ extended: false })); // Parses URL-encoded bodies
-app.use(express.json()); // Parses JSON bodies
-
-// Middleware to capture raw request body
-app.use(express.raw({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) }));
+app.use(express.text()); // Parses text bodies such as DList JWT payloads
+app.use(express.json({ verify: (req: Request, _res: Response, buf: Buffer) => (req.rawBody = buf) })); // Parses JSON bodies and keeps raw payloads for signed webhooks
 
 // Configures CORS policy
 app.use(

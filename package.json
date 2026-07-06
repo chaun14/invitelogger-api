@@ -6,8 +6,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "NODE_ENV=production node .",
+    "start": "npm run build && node .",
     "build": "tsc --build && tsc-alias",
+    "test": "jest --runInBand",
     "dev": "nodemon",
     "format": "prettier . --check",
     "lint": "eslint .",
@@ -59,15 +60,17 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^2.18.1",
+    "mysql2": "^3.22.5",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
+    "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "eslint": "^8.57.0",
@@ -76,9 +79,12 @@
     "express-list-endpoints": "^7.1.0",
     "glob": "^10.3.12",
     "husky": "^9.0.11",
+    "jest": "^30.4.2",
     "lint-staged": "^15.2.2",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.11",
     "tsc-alias": "^1.8.8",
     "typescript": "^5.4.5"
   }

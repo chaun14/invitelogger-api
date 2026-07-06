@@ -49,7 +49,7 @@ export const handleDoubleCounter = async (req: Request, res: Response, next: Nex
 
     const fakeReasonKeys = await restoreFakeData(fakeVerification.fakeCode);
     for (const failedCheck of fakeReasonKeys) {
-      if (failedCheck == "REQUIREDCVERIF") {
+      if (failedCheck == "REQUIRE_DC_VERIF") {
         const newFakeCode = await removeFakeReason(fakeVerification.fakeCode, FakeTypes.REQUIRE_DC_VERIF);
         fakeVerification.fakeCode = newFakeCode;
         fakeVerification.invalidated = newFakeCode == 0 ? null : InvalidatedReason.NEW_FAKE;
@@ -67,8 +67,8 @@ const restoreFakeData = async (code: number) => {
   const fakeReasonKeys: string[] = [];
 
   for (const item of fakeTypesList) {
-    const fakeCode = FakeCodes[item.id];
-    if (code && fakeCode) {
+    const fakeCode = item.code;
+    if (code & fakeCode) {
       fakeReasonKeys.push(FakeTypes[item.id]);
     }
   }
