@@ -37,27 +37,27 @@ type Payment = {
   status: { id: number; description: string };
 };
 
+type RecurringPayment = {
+  reference: string;
+  created_at: string;
+  next_payment_at: string;
+  status: { id: number; description: string };
+  initial_payment: Payment;
+  last_payment: Payment;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  fail_count: number;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+};
+
 type PaymentBody = {
   id?: string;
   type?: PaymentType;
   date?: string;
-  subject?:
-    | Payment
-    | {
-        reference: string;
-        created_at: string;
-        next_payment_at: string;
-        status: { id: number; description: string };
-        initial_payment: Payment;
-        last_payment: Payment;
-        price: {
-          amount: number;
-          currency: string;
-        };
-        fail_count: number;
-        cancelled_at: string | null;
-        cancel_reason: string | null;
-      };
+  subject?: Payment | RecurringPayment;
 };
 
 export const handlePayments = async (req: Request, res: Response, next: NextFunction) => {
@@ -217,9 +217,9 @@ export const handlePayments = async (req: Request, res: Response, next: NextFunc
 
             if (matchingService) {
               if (currentPlan.period === PremiumPlanPeriod.MONTHLY) {
-                matchingService.nextDue = dayjs(matchingService.nextDue).add(1, "month").format("YYYY-MM-DD");
+                matchingService.nextDue = dayjs().add(1, "month").format("YYYY-MM-DD");
               } else if (currentPlan.period === PremiumPlanPeriod.YEARLY) {
-                matchingService.nextDue = dayjs(matchingService.nextDue).add(1, "year").format("YYYY-MM-DD");
+                matchingService.nextDue = dayjs().add(1, "year").format("YYYY-MM-DD");
               }
 
               matchingService.status = PremiumServiceStatus.ACTIVE;
