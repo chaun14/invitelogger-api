@@ -15,7 +15,7 @@ declare global {
       WUMPUSSTORE_VOTE_WEBHOOK?: string;
       TEBEX_API_KEY?: string;
       INTERNAL_API_KEY?: string;
-      SENDGRID_API_KEY?: string;
+      SMTP2GO_API_KEY?: string;
       DC_API_KEY?: string;
       DASH_DB_HOST?: string;
       DASH_DB_PORT?: string;

@@ -61,8 +61,8 @@ const config = {
   // Internal API key for secured access
   internalApiKey: env.INTERNAL_API_KEY,
 
-  // SendGrid API key for sending emails
-  sendgridApiKey: env.SENDGRID_API_KEY,
+  // SMTP2GO API key for sending emails
+  smtp2goApiKey: env.SMTP2GO_API_KEY,
 
   // DoubleCounter integration API key
   dcApiKey: env.DC_API_KEY,

@@ -11,7 +11,7 @@ process.env.WUMPUSSTORE_VOTE_WEBHOOK = "wumpus-secret";
 process.env.INTERNAL_API_KEY = "internal-secret";
 process.env.DC_API_KEY = "dc-secret";
 process.env.TEBEX_API_KEY = "tebex-secret";
-process.env.SENDGRID_API_KEY = "sendgrid-secret";
+process.env.SMTP2GO_API_KEY = "smtp2go-secret";
 
 const mockSendEmail = jest.fn(() => Promise.resolve());
 const mockManagers = {
