@@ -17,14 +17,7 @@ import votes from "./routes/votes/index";
 
 dotEnv.config();
 
-async function main() {
-  await createConnection("bot");
-  console.log("Connection to bot database created");
-  await createConnection("prodbot");
-  console.log("Connection to main bot database created");
-  await createConnection("dash");
-  console.log("Connection to dash database created");
-
+export function createApp(): Express {
   const app: Express = express();
 
   /** Logging */
@@ -80,13 +73,28 @@ async function main() {
   /** Error handling */
   app.use(errorHandler);
 
+  return app;
+}
+
+async function main() {
+  await createConnection("bot");
+  console.log("Connection to bot database created");
+  await createConnection("prodbot");
+  console.log("Connection to main bot database created");
+  await createConnection("dash");
+  console.log("Connection to dash database created");
+
+  const app = createApp();
+
   /** Server */
   const httpServer = http.createServer(app);
   const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
   httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
 }
 
-main().catch((reason: any) => {
-  console.log(reason);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((reason: any) => {
+    console.log(reason);
+    process.exit(1);
+  });
+}
