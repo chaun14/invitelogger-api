@@ -38,7 +38,10 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
     case AuthenticateType.PAYMENT:
       if (config.environment === Environments.PRODUCTION) {
         const hmac = crypto.createHmac("sha256", config.tebexKey!).setEncoding("utf-8");
-        const hash = crypto.createHash("sha256").update(req.rawBody).digest("hex");
+        const hash = crypto
+          .createHash("sha256")
+          .update(req.rawBody as unknown as crypto.BinaryLike)
+          .digest("hex");
 
         return hmac.update(hash).digest("hex") === req.get("X-Signature");
       }
