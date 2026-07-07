@@ -29,6 +29,22 @@ type DlistBody = {
   user_id: string;
 };
 
+type FindMeABotSpaceBody = {
+  event: string;
+  test?: boolean;
+  bot: {
+    id: string;
+    name?: string;
+  };
+  user: {
+    id: string;
+    username?: string;
+    avatar?: string | null;
+  };
+  votedAt?: string;
+  site?: string;
+};
+
 export const handleTopGG = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { body }: { body?: TopggBody } = req;
@@ -147,6 +163,47 @@ export const handleDLIst = async (req: Request, res: Response, next: NextFunctio
       botId: config.botId,
       weekend: false,
       platform: Platform.DLIST,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleFindMeABotSpace = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { body }: { body?: FindMeABotSpaceBody } = req;
+
+    if (!body || !body?.event || !body?.bot?.id || !body?.user?.id) {
+      res.status(400).json({ message: "Missing parameter" });
+      return;
+    }
+
+    if (body.event !== "vote") {
+      res.status(400).json({ message: "Invalid event" });
+      return;
+    }
+
+    if (config.botId !== body.bot.id) {
+      res.status(403).send({ message: "Invalid bot id" });
+      return;
+    }
+
+    res.status(200).send({ message: "Vote received" });
+
+    if (body.test) {
+      return;
+    }
+
+    if (!body.user?.id) {
+      res.status(400).json({ message: "Missing user id" });
+      return;
+    }
+
+    await dashDataSource.manager.insert(Votes, {
+      userId: body.user.id,
+      botId: config.botId,
+      weekend: false,
+      platform: Platform.FINDMEABOTSPACE,
     });
   } catch (error) {
     next(error);

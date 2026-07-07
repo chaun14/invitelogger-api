@@ -5,6 +5,7 @@ export enum Platform {
   VCODES = "vcodes",
   DLIST = "dlist",
   WUMPUS = "wumpus.store",
+  FINDMEABOTSPACE = "findmeabotspace",
 }
 
 @Entity()

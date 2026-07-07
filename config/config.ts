@@ -53,6 +53,7 @@ const config = {
     vcodes: env.VCODES_VOTE_WEBHOOK,
     dlist: env.DLIST_VOTE_WEBHOOK,
     wumpus: env.WUMPUSSTORE_VOTE_WEBHOOK,
+    findmeabotspace: env.FINDMEABOTSPACE_VOTE_WEBHOOK,
   },
 
   // Tebex payment API key
