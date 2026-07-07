@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ -d /c/nvm4w/nodejs ]; then
+  PATH="/c/nvm4w/nodejs:$PATH"
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "ERROR: npm was not found in PATH."
+  echo "Expected npm from C:\\nvm4w\\nodejs. Current PATH: $PATH"
+  exit 127
+fi
+
+npm run lint:staged

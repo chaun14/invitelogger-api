@@ -2,12 +2,18 @@
   "name": "invitelogger-api",
   "version": "1.0.0",
   "description": "invitelogger api",
-  "main": "./bin/server.js",
+  "main": "./bin/src/server.js",
+  "type": "module",
+  "private": true,
   "scripts": {
+    "start": "npm run build && node .",
+    "build": "tsc --build && tsc-alias",
     "test": "jest --runInBand",
-    "start": "tsc --build && node ./bin/server.js",
-    "dev": "nodemon --exec \"tsc --build && node ./bin/server.js\" -e ts,json",
-    "format-staged": "pretty-quick --staged"
+    "dev": "nodemon",
+    "format": "prettier . --check",
+    "lint": "eslint .",
+    "lint:staged": "lint-staged",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -19,41 +25,67 @@
   ],
   "author": "chaun14",
   "license": "ISC",
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,yml,yaml,md}": [
+      "prettier --write"
+    ]
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src",
+      "config",
+      "types",
+      ".env"
+    ],
+    "ext": "ts",
+    "exec": "npm run build && node .",
+    "delay": 2500,
+    "env": {
+      "NODE_ENV": "development"
+    }
+  },
   "bugs": {
     "url": "https://github.com/chaun14/invitelogger-api/issues"
   },
   "homepage": "https://github.com/chaun14/invitelogger-api#readme",
   "dependencies": {
-    "@sendgrid/mail": "^7.7.0",
-    "dayjs": "^1.11.0",
-    "dotenv": "^10.0.0",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.0",
-    "morgan": "^1.10.0",
-    "mysql": "^2.18.1",
-    "reflect-metadata": "^0.1.13",
-    "tslib": "^2.3.1",
-    "typeorm": "^0.2.45",
-    "typescript": "^4.5.4"
+    "chalk": "^5.6.2",
+    "cors": "^2.8.6",
+    "dayjs": "^1.11.21",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.6",
+    "reflect-metadata": "^0.2.2",
+    "smtp2go-nodejs": "^1.0.0",
+    "typeorm": "^1.0.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/jsonwebtoken": "^9.0.1",
-    "@types/morgan": "^1.9.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/supertest": "^7.2.0",
-    "husky": "^4.2.5",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "express-list-endpoints": "^7.1.1",
+    "glob": "^13.0.6",
+    "husky": "^9.1.7",
     "jest": "^30.4.2",
-    "nodemon": "^2.0.15",
-    "prettier": "^2.2.1",
-    "pretty-quick": "^2.0.2",
+    "lint-staged": "^17.0.8",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.4",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.11",
-    "ts-node": "^10.4.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run format-staged"
-    }
+    "tsc-alias": "^1.9.0",
+    "typescript": "^6.0.3"
   }
 }

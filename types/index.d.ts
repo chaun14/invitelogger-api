@@ -1,0 +1,44 @@
+import type Applications from "@entity/dash/Applications.js";
+
+declare global {
+  namespace NodeJS {
+    export interface ProcessEnv {
+      PORT?: string;
+      RATE_LIMIT_IP_ACCESS?: string;
+      RATE_LIMIT_IP_TIME?: string;
+      RATE_LIMIT_TOKEN_ACCESS?: string;
+      RATE_LIMIT_TOKEN_TIME?: string;
+      BOT_ID?: string;
+      TOPGG_VOTE_WEBHOOK?: string;
+      VCODES_VOTE_WEBHOOK?: string;
+      DLIST_VOTE_WEBHOOK?: string;
+      WUMPUSSTORE_VOTE_WEBHOOK?: string;
+      TEBEX_API_KEY?: string;
+      INTERNAL_API_KEY?: string;
+      SMTP2GO_API_KEY?: string;
+      DC_API_KEY?: string;
+      DASH_DB_HOST?: string;
+      DASH_DB_PORT?: string;
+      DASH_DB_USERNAME?: string;
+      DASH_DB_PASSWORD?: string;
+      DASH_DB_DATABASE?: string;
+      BOT_DB_HOST?: string;
+      BOT_DB_PORT?: string;
+      BOT_DB_USERNAME?: string;
+      BOT_DB_PASSWORD?: string;
+      BOT_DB_DATABASE?: string;
+      PROD_DB_HOST?: string;
+      PROD_DB_PORT?: string;
+      PROD_DB_USERNAME?: string;
+      PROD_DB_PASSWORD?: string;
+      PROD_DB_DATABASE?: string;
+    }
+  }
+
+  namespace Express {
+    export interface Request {
+      authenticate?: Applications;
+      rawBody: Buffer;
+    }
+  }
+}

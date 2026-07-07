@@ -1,100 +1,43 @@
-/** source/server.ts */
-import http from "http";
-import express, { ErrorRequestHandler, Express, NextFunction, Router } from "express";
-import { createConnection } from "typeorm";
-import dotEnv from "dotenv";
-import "reflect-metadata";
+import "reflect-metadata"; // for decorators
+import "dotenv/config.js"; // .env file
 
-// middlewares
-import errorHandler from "./middlewares/errorHandler";
-import morgan from "morgan";
-import bodyParser from "body-parser";
+import { prodbotDataSource, dashDataSource, customBotDataSource } from "@config/orm";
+import config, { Environments } from "@config";
 
-// routes
-import v1 from "./routes/v1";
-import payments from "./routes/payments/tebex";
-import votes from "./routes/votes/index";
+import logger, { Level } from "@utils/logger.js";
 
-dotEnv.config();
+import app from "./app.js";
 
-export function createApp(): Express {
-  const app: Express = express();
+const PORT: number | string = config.port ? Number(config.port) : 5780;
 
-  /** Logging */
-  app.use(morgan("dev"));
-  /** Parse the request */
-  app.use(express.urlencoded({ extended: false }));
+// Initialize TypeORM data sources
+const initializeDataSources = async (): Promise<void> => {
+  await prodbotDataSource.initialize();
+  logger(Level.INFO, "Connection to main prod database initialized");
 
-  // retrieve raw body for webhook validation
+  await dashDataSource.initialize();
+  logger(Level.INFO, "Connection to dash database initialized");
 
-  app.use(
-    bodyParser.json({
-      verify: function (req, res, buf, encoding) {
-        //console.log("buf", buf);
-        req.rawBody = buf;
-      },
-    })
-  );
-  app.use(express.text());
+  await customBotDataSource.initialize();
+  logger(Level.INFO, "Connection to custom bot database initialized");
+};
 
-  /** Takes care of JSON data */
-  app.use(express.json());
+// starts the server
+const startServer = async (): Promise<void> => {
+  await initializeDataSources();
 
-  /** RULES OF OUR API */
-  app.use((req, res, next) => {
-    // set the CORS policy
-    res.header("Access-Control-Allow-Origin", "*");
-    // set the CORS headers
-    res.header("Access-Control-Allow-Headers", "origin, X-Requested-With,Content-Type,Accept, Authorization");
-    // set the CORS method headers
-    if (req.method === "OPTIONS") {
-      res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
-      return res.status(200).json({});
+  app.listen(PORT, () => logger(Level.INFO, `Server running on port ${PORT}`));
+};
+
+startServer()
+  .then(async () => {
+    if (config.environment === Environments.DEVELOPMENT) {
+      // Log endpoints only in development mode
+      const endpoints = (await import("express-list-endpoints")).default;
+      console.log(endpoints(app));
     }
-    next();
-  });
-
-  /** Routes */
-  app.use("/", payments);
-  app.use("/", votes);
-  app.use("/v1", v1);
-  app.use("/internal", require("./routes/internal"));
-  app.use("/integrations", require("./routes/integrations"));
-  app.get("/", (req, res) => res.redirect("/v1"));
-
-  /** Not found */
-  app.use((req, res, next) => {
-    const error = new Error("not found");
-    return res.status(404).json({
-      message: error.message,
-    });
-  });
-
-  /** Error handling */
-  app.use(errorHandler);
-
-  return app;
-}
-
-async function main() {
-  await createConnection("bot");
-  console.log("Connection to bot database created");
-  await createConnection("prodbot");
-  console.log("Connection to main bot database created");
-  await createConnection("dash");
-  console.log("Connection to dash database created");
-
-  const app = createApp();
-
-  /** Server */
-  const httpServer = http.createServer(app);
-  const PORT: number | string = process.env.PORT ? process.env.PORT : 5780;
-  httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
-}
-
-if (require.main === module) {
-  main().catch((reason: any) => {
-    console.log(reason);
+  })
+  .catch((reason: any): void => {
+    logger(Level.ERROR, reason); // Log any startup errors
     process.exit(1);
   });
-}

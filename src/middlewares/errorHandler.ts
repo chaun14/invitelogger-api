@@ -1,11 +1,23 @@
-import { ErrorRequestHandler } from "express";
+import { ErrorRequestHandler, Request, Response } from "express";
 
-// middleware checking for basic token authentication
-const errorHandler : ErrorRequestHandler = async (err, req, res, next) => {
-  console.error(err)
-  res.status(500).json({
-    message: 'Unexpected error'
-  })
+import logger, { Level } from "@utils/logger.js";
+import config, { Environments } from "@config";
+
+const errorHandler: ErrorRequestHandler = (err, _req: Request, res: Response) => {
+  const statusCode = res.statusCode === 200 ? err.statusCode || 500 : res.statusCode;
+  res.status(statusCode);
+
+  logger(Level.ERROR, err);
+
+  const body: { message: string; stack?: string } = {
+    message: statusCode === 500 ? "Something went wrong on our end" : err.message,
+  };
+
+  if (config.environment === Environments.DEVELOPMENT) {
+    body.stack = err.stack;
+  }
+
+  res.json(body);
 };
 
 export default errorHandler;

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+commit_msg=$(cat "$1")
+
+types="feat|fix|refactor|docs|style|test|chore|ci|perf|revert"
+
+if ! echo "$commit_msg" | grep -Eq "^($types)"; then
+  echo ""
+  echo "ERROR: Missing or incorrect commit type."
+  echo "The commit message must start with one of the following types: $types"
+  echo ""
+  exit 1
+fi
+
+if ! echo "$commit_msg" | grep -Eq ": [a-z].{2,75}$"; then
+  echo ""
+  echo "ERROR: Missing or incorrect commit description."
+  echo "The commit description must be written in lowercase and be between 3 and 75 characters long."
+  echo ""
+  exit 1
+fi
