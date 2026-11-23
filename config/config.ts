@@ -68,6 +68,12 @@ const config = {
   // verification.gg integration token
   verifGgIntegrationToken: env.VERIFGG_INTEGRATION_TOKEN,
 
+  // Yggdrasil connection
+  yggdrasil: {
+    url: env.YGGDRASIL_URL,
+    key: env.YGGDRASIL_KEY,
+  },
+
   // Database configurations
   databases: {
     dash: {

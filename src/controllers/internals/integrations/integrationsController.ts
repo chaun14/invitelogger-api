@@ -5,6 +5,7 @@ import Joins, { InvalidatedReason } from "@entity/bot/Joins.js";
 
 import config from "@config";
 import { prodbotDataSource } from "@config/orm";
+import { yggdrasilClient } from "@utils/yggdrasil.js";
 
 type VerificationGgBody = {
   event: "member.verified" | "connection.revoked";
@@ -15,6 +16,7 @@ type VerificationGgBody = {
 };
 
 const VERIFGG_FAKE_CODE = 32;
+const DISCORD_SNOWFLAKE = /^\d{17,20}$/;
 
 export const handleVerificationGg = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -30,6 +32,14 @@ export const handleVerificationGg = async (req: Request, res: Response, next: Ne
       return;
     }
 
+    if (
+      !DISCORD_SNOWFLAKE.test(body.guild_id) ||
+      (body.event === "member.verified" && !DISCORD_SNOWFLAKE.test(body.member_id!))
+    ) {
+      res.status(400).json({ message: "Invalid snowflake" });
+      return;
+    }
+
     const guildSettings = await prodbotDataSource.manager.findOne(GuildSettings, {
       where: { guildId: body.guild_id, botId: config.botId },
     });
@@ -42,6 +52,7 @@ export const handleVerificationGg = async (req: Request, res: Response, next: Ne
       if (guildSettings.integrations?.verification?.enabled) {
         delete guildSettings.integrations.verification;
         await prodbotDataSource.manager.save(guildSettings);
+        yggdrasilClient.clearGuildSettingsCache(body.guild_id);
       }
 
       res.status(200).json({ message: "Connection revoked" });
@@ -57,7 +68,7 @@ export const handleVerificationGg = async (req: Request, res: Response, next: Ne
       where: {
         botId: config.botId,
         guildId: body.guild_id,
-        memberId: body.member_id,
+        memberId: body.member_id!,
         invalidated: InvalidatedReason.NEW_FAKE,
       },
       order: { createdAt: "DESC" },
@@ -72,6 +83,7 @@ export const handleVerificationGg = async (req: Request, res: Response, next: Ne
     fakeVerification.fakeCode = newFakeCode;
     fakeVerification.invalidated = newFakeCode === 0 ? null : InvalidatedReason.NEW_FAKE;
     await prodbotDataSource.manager.save(fakeVerification);
+    yggdrasilClient.clearLeaderboardCache(body.guild_id);
 
     res.status(200).json({ message: "Success" });
   } catch (error) {

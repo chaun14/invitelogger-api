@@ -15,6 +15,8 @@ process.env.TEBEX_API_KEY = "tebex-secret";
 process.env.SMTP2GO_API_KEY = "smtp2go-secret";
 
 const mockSendEmail = jest.fn(() => Promise.resolve());
+const mockClearGuildSettingsCache = jest.fn();
+const mockClearLeaderboardCache = jest.fn();
 const mockManagers = {
   dash: createManager(),
   customBot: createManager(),
@@ -28,6 +30,12 @@ jest.mock("@middlewares/errorHandler.js", () => (err, _req, res, _next) => {
   res.status(statusCode).json({ message: statusCode === 500 ? "Something went wrong on our end" : err.message });
 });
 jest.mock("@utils/email.js", () => ({ sendEmail: mockSendEmail }));
+jest.mock("@utils/yggdrasil.js", () => ({
+  yggdrasilClient: {
+    clearGuildSettingsCache: mockClearGuildSettingsCache,
+    clearLeaderboardCache: mockClearLeaderboardCache,
+  },
+}));
 jest.mock("@config/orm", () => ({
   dashDataSource: { manager: mockManagers.dash },
   customBotDataSource: { manager: mockManagers.customBot },
@@ -81,6 +89,8 @@ function createManager() {
 function resetManagers() {
   Object.values(mockManagers).forEach((manager) => manager.reset());
   mockSendEmail.mockClear();
+  mockClearGuildSettingsCache.mockClear();
+  mockClearLeaderboardCache.mockClear();
 }
 
 function auth(token = "valid-token") {
@@ -90,6 +100,9 @@ function auth(token = "valid-token") {
 function integrationAuth(token = "verifgg-secret") {
   return `Integration ${token}`;
 }
+
+const integrationGuildId = "123456789012345678";
+const integrationMemberId = "234567890123456789";
 
 function authenticatePublic(application = { guildId: "guild-1", botId: process.env.BOT_ID }) {
   mockManagers.dash.queue("findOne", [application]);
@@ -625,6 +638,16 @@ describe("internal email and integration endpoints", () => {
       .set("Authorization", integrationAuth())
       .send({ guild_id: "guild-1" })
       .expect(400, { message: "Missing parameter" });
+    await request(app)
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "not-a-snowflake", member_id: integrationMemberId })
+      .expect(400, { message: "Invalid snowflake" });
+    await request(app)
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: integrationGuildId, member_id: "not-a-snowflake" })
+      .expect(400, { message: "Invalid snowflake" });
   });
 
   it("rejects unknown guilds, disabled integrations, and users without pending fake verification", async () => {
@@ -632,7 +655,7 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
+      .send({ event: "member.verified", guild_id: integrationGuildId, member_id: integrationMemberId })
       .expect(404, { message: "Unknown guild" });
 
     resetManagers();
@@ -640,7 +663,7 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
+      .send({ event: "member.verified", guild_id: integrationGuildId, member_id: integrationMemberId })
       .expect(403, { message: "Integration not enabled" });
 
     resetManagers();
@@ -648,7 +671,7 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
+      .send({ event: "member.verified", guild_id: integrationGuildId, member_id: integrationMemberId })
       .expect(403, { message: "No fake verification needed for this user" });
   });
 
@@ -661,13 +684,19 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1", data: { method: "checks" } })
+      .send({
+        event: "member.verified",
+        guild_id: integrationGuildId,
+        member_id: integrationMemberId,
+        data: { method: "checks" },
+      })
       .expect(200, { message: "Success" });
 
     expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
       method: "save",
       data: { fakeCode: 0, invalidated: null },
     });
+    expect(mockClearLeaderboardCache).toHaveBeenCalledWith(integrationGuildId);
   });
 
   it("keeps a fake verification invalidated when other fake flags remain", async () => {
@@ -679,7 +708,7 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
+      .send({ event: "member.verified", guild_id: integrationGuildId, member_id: integrationMemberId })
       .expect(200, { message: "Success" });
 
     expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
@@ -695,13 +724,14 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "connection.revoked", guild_id: "guild-1", member_id: null, data: {} })
+      .send({ event: "connection.revoked", guild_id: integrationGuildId, member_id: null, data: {} })
       .expect(200, { message: "Connection revoked" });
 
     expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
       method: "save",
       data: { integrations: {} },
     });
+    expect(mockClearGuildSettingsCache).toHaveBeenCalledWith(integrationGuildId);
   });
 
   it("routes verification.gg persistence failures through the error handler", async () => {
@@ -714,7 +744,7 @@ describe("internal email and integration endpoints", () => {
     await request(app)
       .post("/integrations/verifgg/verification")
       .set("Authorization", integrationAuth())
-      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
+      .send({ event: "member.verified", guild_id: integrationGuildId, member_id: integrationMemberId })
       .expect(500, { message: "Something went wrong on our end" });
   });
 });

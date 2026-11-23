@@ -5,6 +5,7 @@ import { prodbotDataSource, dashDataSource, customBotDataSource } from "@config/
 import config, { Environments } from "@config";
 
 import logger, { Level } from "@utils/logger.js";
+import { yggdrasilClient } from "@utils/yggdrasil.js";
 
 import app from "./app.js";
 
@@ -25,6 +26,8 @@ const initializeDataSources = async (): Promise<void> => {
 // starts the server
 const startServer = async (): Promise<void> => {
   await initializeDataSources();
+
+  yggdrasilClient.connect();
 
   app.listen(PORT, () => logger(Level.INFO, `Server running on port ${PORT}`));
 };

@@ -17,6 +17,8 @@ declare global {
       INTERNAL_API_KEY?: string;
       SMTP2GO_API_KEY?: string;
       VERIFGG_INTEGRATION_TOKEN?: string;
+      YGGDRASIL_URL?: string;
+      YGGDRASIL_KEY?: string;
       DASH_DB_HOST?: string;
       DASH_DB_PORT?: string;
       DASH_DB_USERNAME?: string;
