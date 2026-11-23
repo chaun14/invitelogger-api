@@ -276,7 +276,7 @@ describe("invite endpoints", () => {
         { invalidated: null },
         { invalidated: "fake" },
         { invalidated: "young" },
-        { invalidated: "newfake" },
+        { invalidated: "newFake" },
         { invalidated: "self" },
         { invalidated: "leave" },
       ],
@@ -678,7 +678,7 @@ describe("internal email and integration endpoints", () => {
   it("clears only the verification.gg fake flag", async () => {
     mockManagers.prodbot.queue("findOne", [
       { integrations: { verification: { enabled: true } } },
-      { fakeCode: 32, invalidated: "newfake" },
+      { fakeCode: 32, invalidated: "newFake" },
     ]);
 
     await request(app)
@@ -702,7 +702,7 @@ describe("internal email and integration endpoints", () => {
   it("keeps a fake verification invalidated when other fake flags remain", async () => {
     mockManagers.prodbot.queue("findOne", [
       { integrations: { verification: { enabled: true } } },
-      { fakeCode: 33, invalidated: "newfake" },
+      { fakeCode: 33, invalidated: "newFake" },
     ]);
 
     await request(app)
@@ -713,7 +713,7 @@ describe("internal email and integration endpoints", () => {
 
     expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
       method: "save",
-      data: { fakeCode: 1, invalidated: "newfake" },
+      data: { fakeCode: 1, invalidated: "newFake" },
     });
   });
 
@@ -737,7 +737,7 @@ describe("internal email and integration endpoints", () => {
   it("routes verification.gg persistence failures through the error handler", async () => {
     mockManagers.prodbot.queue("findOne", [
       { integrations: { verification: { enabled: true } } },
-      { fakeCode: 32, invalidated: "newfake" },
+      { fakeCode: 32, invalidated: "newFake" },
     ]);
     mockManagers.prodbot.queue("save", [new Error("save failed")]);
 
