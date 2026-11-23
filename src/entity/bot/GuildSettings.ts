@@ -1,5 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
+export type VerificationIntegration = {
+  enabled: true;
+  scopes: string[];
+  grantedAt: string;
+};
+
 @Entity({ name: "guildSettings" })
 class GuildSettings {
   @PrimaryGeneratedColumn({ type: "bigint" })
@@ -12,7 +18,7 @@ class GuildSettings {
   botId: string;
 
   @Column({ type: "json" })
-  integrations: { dc?: { enabled: boolean } };
+  integrations: { verification?: VerificationIntegration } | null;
 }
 
 export default GuildSettings;

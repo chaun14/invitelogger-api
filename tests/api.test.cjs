@@ -10,7 +10,7 @@ process.env.VCODES_VOTE_WEBHOOK = "vcodes-secret";
 process.env.DLIST_VOTE_WEBHOOK = "dlist-secret";
 process.env.WUMPUSSTORE_VOTE_WEBHOOK = "wumpus-secret";
 process.env.INTERNAL_API_KEY = "internal-secret";
-process.env.DC_API_KEY = "dc-secret";
+process.env.VERIFGG_INTEGRATION_TOKEN = "verifgg-secret";
 process.env.TEBEX_API_KEY = "tebex-secret";
 process.env.SMTP2GO_API_KEY = "smtp2go-secret";
 
@@ -85,6 +85,10 @@ function resetManagers() {
 
 function auth(token = "valid-token") {
   return `Bearer ${token}`;
+}
+
+function integrationAuth(token = "verifgg-secret") {
+  return `Integration ${token}`;
 }
 
 function authenticatePublic(application = { guildId: "guild-1", botId: process.env.BOT_ID }) {
@@ -601,19 +605,24 @@ describe("internal email and integration endpoints", () => {
       .expect(500, { message: "Something went wrong on our end" });
   });
 
-  it("requires a valid Double Counter token and validates required fields", async () => {
+  it("requires a valid verification.gg token and validates required fields", async () => {
     await request(app)
-      .post("/integrations/dc/verification")
+      .post("/integrations/verifgg/verification")
       .send({})
       .expect(401, { message: "Invalid or missing authorization token" });
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("wrong"))
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth("wrong"))
       .send({})
       .expect(401, { message: "Invalid or missing authorization token" });
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", auth("verifgg-secret"))
+      .send({})
+      .expect(401, { message: "Invalid or missing authorization token" });
+    await request(app)
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
       .send({ guild_id: "guild-1" })
       .expect(400, { message: "Missing parameter" });
   });
@@ -621,38 +630,38 @@ describe("internal email and integration endpoints", () => {
   it("rejects unknown guilds, disabled integrations, and users without pending fake verification", async () => {
     mockManagers.prodbot.queue("findOne", [undefined]);
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
-      .send({ guild_id: "guild-1", member_id: "member-1" })
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
       .expect(404, { message: "Unknown guild" });
 
     resetManagers();
-    mockManagers.prodbot.queue("findOne", [{ integrations: { dc: { enabled: false } } }]);
+    mockManagers.prodbot.queue("findOne", [{ integrations: {} }]);
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
-      .send({ guild_id: "guild-1", member_id: "member-1" })
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
       .expect(403, { message: "Integration not enabled" });
 
     resetManagers();
-    mockManagers.prodbot.queue("findOne", [{ integrations: { dc: { enabled: true } } }, undefined]);
+    mockManagers.prodbot.queue("findOne", [{ integrations: { verification: { enabled: true } } }, undefined]);
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
-      .send({ guild_id: "guild-1", member_id: "member-1" })
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
       .expect(403, { message: "No fake verification needed for this user" });
   });
 
-  it("clears only the Double Counter fake flag", async () => {
+  it("clears only the verification.gg fake flag", async () => {
     mockManagers.prodbot.queue("findOne", [
-      { integrations: { dc: { enabled: true } } },
+      { integrations: { verification: { enabled: true } } },
       { fakeCode: 32, invalidated: "newfake" },
     ]);
 
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
-      .send({ guild_id: "guild-1", member_id: "member-1" })
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1", data: { method: "checks" } })
       .expect(200, { message: "Success" });
 
     expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
@@ -663,14 +672,14 @@ describe("internal email and integration endpoints", () => {
 
   it("keeps a fake verification invalidated when other fake flags remain", async () => {
     mockManagers.prodbot.queue("findOne", [
-      { integrations: { dc: { enabled: true } } },
+      { integrations: { verification: { enabled: true } } },
       { fakeCode: 33, invalidated: "newfake" },
     ]);
 
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
-      .send({ guild_id: "guild-1", member_id: "member-1" })
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
       .expect(200, { message: "Success" });
 
     expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
@@ -679,17 +688,33 @@ describe("internal email and integration endpoints", () => {
     });
   });
 
-  it("routes Double Counter persistence failures through the error handler", async () => {
+  it("disables the verification.gg integration when its connection is revoked", async () => {
+    const guildSettings = { integrations: { verification: { enabled: true } } };
+    mockManagers.prodbot.queue("findOne", [guildSettings]);
+
+    await request(app)
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "connection.revoked", guild_id: "guild-1", member_id: null, data: {} })
+      .expect(200, { message: "Connection revoked" });
+
+    expect(mockManagers.prodbot.calls.at(-1)).toMatchObject({
+      method: "save",
+      data: { integrations: {} },
+    });
+  });
+
+  it("routes verification.gg persistence failures through the error handler", async () => {
     mockManagers.prodbot.queue("findOne", [
-      { integrations: { dc: { enabled: true } } },
+      { integrations: { verification: { enabled: true } } },
       { fakeCode: 32, invalidated: "newfake" },
     ]);
     mockManagers.prodbot.queue("save", [new Error("save failed")]);
 
     await request(app)
-      .post("/integrations/dc/verification")
-      .set("Authorization", auth("dc-secret"))
-      .send({ guild_id: "guild-1", member_id: "member-1" })
+      .post("/integrations/verifgg/verification")
+      .set("Authorization", integrationAuth())
+      .send({ event: "member.verified", guild_id: "guild-1", member_id: "member-1" })
       .expect(500, { message: "Something went wrong on our end" });
   });
 });

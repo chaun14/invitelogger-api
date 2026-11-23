@@ -20,6 +20,11 @@ const getToken = (authorization: string | undefined, withoutBearer: boolean = fa
     : null;
 };
 
+const getIntegrationToken = (authorization: string | undefined): string | null => {
+  const prefix = "Integration ";
+  return authorization?.startsWith(prefix) ? authorization.substring(prefix.length) : null;
+};
+
 const verifyToken = async (token: string | null, req: Request, authType: AuthenticateType): Promise<boolean> => {
   if (!token) {
     return false;
@@ -48,7 +53,7 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
 
       return true;
     case AuthenticateType.INTEGRATION:
-      return token === config.dcApiKey;
+      return token === config.verifGgIntegrationToken;
     case AuthenticateType.VOTE:
       return token === config.voteWebhooks[req.path.substring(1)];
   }
@@ -59,7 +64,10 @@ const verifyToken = async (token: string | null, req: Request, authType: Authent
 const authenticate = (authType: AuthenticateType) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tokenSource = authType === AuthenticateType.PAYMENT ? req.get("X-Signature") : req.headers.authorization;
-    const token = getToken(tokenSource, authType === AuthenticateType.VOTE);
+    const token =
+      authType === AuthenticateType.INTEGRATION
+        ? getIntegrationToken(tokenSource)
+        : getToken(tokenSource, authType === AuthenticateType.VOTE);
 
     if (await verifyToken(token, req, authType)) {
       next();

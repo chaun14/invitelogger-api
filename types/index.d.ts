@@ -16,7 +16,7 @@ declare global {
       TEBEX_API_KEY?: string;
       INTERNAL_API_KEY?: string;
       SMTP2GO_API_KEY?: string;
-      DC_API_KEY?: string;
+      VERIFGG_INTEGRATION_TOKEN?: string;
       DASH_DB_HOST?: string;
       DASH_DB_PORT?: string;
       DASH_DB_USERNAME?: string;
